@@ -1,0 +1,48 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidImageType() {
+      return resource.contentType.matches('image/.*');
+    }
+    
+    function isValidImageSize() {
+      return resource.size < 5 * 1024 * 1024; // 5MB max
+    }
+
+    // Profile images - users can only upload their own profile images
+    match /profile_images/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) && 
+                      isValidImageType() && 
+                      isValidImageSize();
+      allow delete: if isOwner(userId);
+    }
+
+    // Class images - only teachers and admins can upload
+    match /class_images/{classId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && 
+                      isValidImageType() && 
+                      isValidImageSize();
+      allow delete: if isAuthenticated();
+    }
+
+    // General uploads (receipts, documents, etc.)
+    match /uploads/{userId}/{fileName} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && 
+                      resource.size < 10 * 1024 * 1024; // 10MB max
+      allow delete: if isOwner(userId);
+    }
+  }
+}

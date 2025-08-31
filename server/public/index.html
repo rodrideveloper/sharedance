@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShareDance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        .welcome {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        .environment {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .api-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .dance-emoji {
+            font-size: 3rem;
+            animation: bounce 1s ease-in-out infinite;
+            margin: 1rem 0;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">ShareDance</div>
+        <div class="welcome" id="welcomeText">Bienvenidos a ShareDance</div>
+        <div class="subtitle">Tu plataforma de gestión de clases de baile</div>
+        <div class="dance-emoji">💃🕺</div>
+        <div class="environment" id="envBadge">Cargando...</div>
+        <div class="api-info">
+            <strong>API Status:</strong> ✅ Activo<br>
+            <strong>Health Check:</strong> <span id="healthUrl">/health</span><br>
+            <strong>Version:</strong> 1.0.0
+        </div>
+    </div>
+
+    <script>
+        // Use server-injected environment variables
+        console.log('Script starting, window.ENV:', window.ENV);
+
+        function updateEnvironment() {
+            try {
+                console.log('updateEnvironment called');
+
+                const envData = window.ENV || {};
+                const isStaging = envData.IS_STAGING === true;
+                const isProduction = envData.IS_PRODUCTION === true;
+
+                console.log('Environment check:', {
+                    NODE_ENV: envData.NODE_ENV,
+                    isStaging: isStaging,
+                    isProduction: isProduction,
+                    ENV: envData
+                });
+
+                const envBadgeElement = document.getElementById('envBadge');
+                const welcomeElement = document.getElementById('welcomeText');
+                const healthElement = document.getElementById('healthUrl');
+
+                if (!envBadgeElement) {
+                    console.error('envBadge element not found');
+                    return;
+                }
+
+                if (isStaging) {
+                    console.log('✅ Setting STAGING environment');
+                    envBadgeElement.textContent = 'Desarrollo';
+                    envBadgeElement.style.background = 'rgba(255, 193, 7, 0.3)';
+                    envBadgeElement.style.color = '#856404';
+                    if (welcomeElement) welcomeElement.textContent = 'Bienvenidos a ShareDance Dev';
+                } else if (isProduction) {
+                    console.log('✅ Setting PRODUCTION environment');
+                    envBadgeElement.textContent = 'Producción';
+                    envBadgeElement.style.background = 'rgba(40, 167, 69, 0.3)';
+                    envBadgeElement.style.color = '#155724';
+                    if (welcomeElement) welcomeElement.textContent = 'Bienvenidos a ShareDance';
+                } else {
+                    console.log('❌ No environment detected');
+                    envBadgeElement.textContent = 'Error de entorno';
+                    envBadgeElement.style.background = 'rgba(220, 53, 69, 0.3)';
+                    envBadgeElement.style.color = '#721c24';
+                }
+
+                if (healthElement) {
+                    healthElement.textContent = window.location.origin + '/health';
+                }
+
+                console.log('Environment update completed');
+            } catch (error) {
+                console.error('Error updating environment:', error);
+            }
+        }
+
+        // Try multiple ways to ensure the function runs
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', updateEnvironment);
+        } else {
+            updateEnvironment();
+        }
+
+        // Also try with a timeout as backup
+        setTimeout(updateEnvironment, 500);
+    </script>
+</body>
+
+</html>
