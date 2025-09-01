@@ -26,18 +26,16 @@ class AuthSignUpWithEmailRequested extends AuthEvent {
   final String password;
   final String name;
   final String? phone;
-  final UserRole role;
 
   const AuthSignUpWithEmailRequested({
     required this.email,
     required this.password,
     required this.name,
     this.phone,
-    required this.role,
   });
 
   @override
-  List<Object?> get props => [email, password, name, phone, role];
+  List<Object?> get props => [email, password, name, phone];
 }
 
 class AuthSignInWithGoogleRequested extends AuthEvent {}

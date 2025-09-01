@@ -53,7 +53,6 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String name,
     String? phone,
-    required UserRole role,
   }) async {
     try {
       debugPrint('🔥 AuthRepo: Creando usuario con email: $email');
@@ -71,7 +70,7 @@ class AuthRepositoryImpl implements AuthRepository {
         name: name,
         email: email,
         phone: phone,
-        role: role, // Use provided role
+        role: UserRole.student, // Always student for mobile app registration
         credits: 0, // Initial credits
         createdAt: DateTime.now(),
       );

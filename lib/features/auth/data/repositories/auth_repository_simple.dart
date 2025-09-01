@@ -62,10 +62,9 @@ class AuthRepositorySimple implements AuthRepository {
     required String password,
     required String name,
     String? phone,
-    required UserRole role,
   }) async {
     try {
-      debugPrint('🔥 AuthRepo: Registrando usuario $email con rol $role');
+      debugPrint('🔥 AuthRepo: Registrando usuario $email como student');
 
       // Crear usuario en Firebase Auth
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -83,7 +82,7 @@ class AuthRepositorySimple implements AuthRepository {
         name: name,
         email: email,
         phone: phone,
-        role: role,
+        role: UserRole.student, // Always student for mobile app registration
         credits: 0,
         createdAt: DateTime.now(),
         isActive: true,

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/utils/flavor_helper.dart';
 import '../../../../core/utils/validators.dart';
-import '../../../../shared/models/models.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -24,7 +23,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _phoneController = TextEditingController();
   bool _isObscured = true;
   bool _isConfirmObscured = true;
-  UserRole _selectedRole = UserRole.student; // Rol por defecto
 
   @override
   void dispose() {
@@ -144,31 +142,6 @@ class _RegisterPageState extends State<RegisterPage> {
                               prefixIcon: Icon(Icons.phone),
                               border: OutlineInputBorder(),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Role Selection
-                          DropdownButtonFormField<UserRole>(
-                            value: _selectedRole,
-                            decoration: const InputDecoration(
-                              labelText: 'Tipo de usuario',
-                              prefixIcon: Icon(Icons.person),
-                              border: OutlineInputBorder(),
-                            ),
-                            items:
-                                UserRole.values.map((UserRole role) {
-                                  return DropdownMenuItem<UserRole>(
-                                    value: role,
-                                    child: Text(_getRoleDisplayName(role)),
-                                  );
-                                }).toList(),
-                            onChanged: (UserRole? newValue) {
-                              if (newValue != null) {
-                                setState(() {
-                                  _selectedRole = newValue;
-                                });
-                              }
-                            },
                           ),
                           const SizedBox(height: 16),
 
@@ -301,9 +274,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _signUp(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      debugPrint('🔥 Intentando registro con email: ${_emailController.text}');
+      debugPrint('🔥 Email: ${_emailController.text}');
       debugPrint('🔥 Nombre: ${_nameController.text}');
-      debugPrint('🔥 Rol seleccionado: ${_getRoleDisplayName(_selectedRole)}');
+      debugPrint('🔥 Registrando como estudiante (rol por defecto)');
       debugPrint(
         '🔥 Teléfono: ${_phoneController.text.isNotEmpty ? _phoneController.text : 'No proporcionado'}',
       );
@@ -317,20 +290,8 @@ class _RegisterPageState extends State<RegisterPage> {
               _phoneController.text.trim().isNotEmpty
                   ? _phoneController.text.trim()
                   : null,
-          role: _selectedRole,
         ),
       );
-    }
-  }
-
-  String _getRoleDisplayName(UserRole role) {
-    switch (role) {
-      case UserRole.student:
-        return 'Alumno';
-      case UserRole.teacher:
-        return 'Profesor';
-      case UserRole.admin:
-        return 'Administrador';
     }
   }
 }

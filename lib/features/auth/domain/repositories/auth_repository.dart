@@ -11,7 +11,6 @@ abstract class AuthRepository {
     required String password,
     required String name,
     String? phone,
-    required UserRole role,
   });
 
   Future<UserModel> signInWithGoogle();

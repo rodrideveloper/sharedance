@@ -75,7 +75,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
         name: event.name,
         phone: event.phone,
-        role: event.role,
       );
 
       debugPrint('🔥 AuthBloc: Registro exitoso para ${user.email}');
