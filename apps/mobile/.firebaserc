@@ -1,0 +1,10 @@
+{
+  "projects": {
+    "default": "sharedance-staging",
+    "sharedance-staging": "sharedance-staging",
+    "sharedance-production": "sharedance-production"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

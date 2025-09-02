@@ -72,10 +72,12 @@ functions/.runtimeconfig.json
 
 # Environment variables
 .env
+.env.*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
 
 # Build outputs
 *.apk
@@ -92,7 +94,16 @@ server/node_modules/
 server/logs/
 server/dist/
 server/.env
+server/.env.*
+!server/.env.example
 server/serviceAccount-*.json
+backend/server/node_modules/
+backend/server/logs/
+backend/server/dist/
+backend/server/.env
+backend/server/.env.*
+!backend/server/.env.example
+backend/server/serviceAccount-*.json
 
 # Nginx configs with sensitive data
 server/nginx-*.conf

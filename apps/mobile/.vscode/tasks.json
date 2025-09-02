@@ -1,0 +1,59 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Flutter: Run Staging",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"--flavor",
+				"staging",
+				"--dart-define=FLAVOR=staging"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": [
+				"$dart-flutter"
+			]
+		},
+		{
+			"label": "Flutter: Run Production",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"--flavor",
+				"production",
+				"--dart-define=FLAVOR=production"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": [
+				"$dart-flutter"
+			]
+		},
+		{
+			"label": "Firebase: Deploy Staging",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"firebase use sharedance-staging && firebase deploy --only functions"
+			],
+			"group": "build",
+			"isBackground": false
+		},
+		{
+			"label": "Firebase: Deploy Production",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"firebase use sharedance-production && firebase deploy --only functions"
+			],
+			"group": "build",
+			"isBackground": false
+		}
+	]
+}

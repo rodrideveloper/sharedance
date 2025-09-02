@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Flutter: Run Staging",
+			"label": "Mobile: Run Staging",
 			"type": "shell",
 			"command": "flutter",
 			"args": [
@@ -11,14 +11,21 @@
 				"staging",
 				"--dart-define=FLAVOR=staging"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}/apps/mobile"
+			},
 			"group": "build",
-			"isBackground": false,
-			"problemMatcher": [
-				"$dart-flutter"
-			]
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			}
 		},
 		{
-			"label": "Flutter: Run Production",
+			"label": "Mobile: Run Production",
 			"type": "shell",
 			"command": "flutter",
 			"args": [
@@ -27,11 +34,24 @@
 				"production",
 				"--dart-define=FLAVOR=production"
 			],
-			"group": "build",
-			"isBackground": false,
-			"problemMatcher": [
-				"$dart-flutter"
-			]
+			"options": {
+				"cwd": "${workspaceFolder}/apps/mobile"
+			},
+			"group": "build"
+		},
+		{
+			"label": "Dashboard: Run Web",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"chrome"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/apps/dashboard"
+			},
+			"group": "build"
 		},
 		{
 			"label": "Firebase: Deploy Staging",
@@ -41,8 +61,10 @@
 				"-c",
 				"firebase use sharedance-staging && firebase deploy --only functions"
 			],
-			"group": "build",
-			"isBackground": false
+			"options": {
+				"cwd": "${workspaceFolder}/backend/functions"
+			},
+			"group": "build"
 		},
 		{
 			"label": "Firebase: Deploy Production",
@@ -52,8 +74,49 @@
 				"-c",
 				"firebase use sharedance-production && firebase deploy --only functions"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}/backend/functions"
+			},
+			"group": "build"
+		},
+		{
+			"label": "Backend: Start Server",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"start"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/backend/server"
+			},
 			"group": "build",
-			"isBackground": false
+			"isBackground": true
+		},
+		{
+			"label": "Setup: Install All Dependencies",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"cd packages/shared_models && flutter pub get && cd ../shared_services && flutter pub get && cd ../shared_constants && flutter pub get && cd ../../apps/mobile && flutter pub get && cd ../dashboard && flutter pub get && cd ../../backend/functions && npm install && cd ../server && npm install"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Shared: Build Models",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"packages",
+				"pub",
+				"run",
+				"build_runner",
+				"build"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/packages/shared_models"
+			},
+			"group": "build"
 		}
 	]
 }
