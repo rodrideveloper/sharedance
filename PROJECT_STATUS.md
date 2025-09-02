@@ -45,7 +45,8 @@ sharedance/
 ### **📧 Sistema de Invitaciones (100% completo)**
 - ✅ **Backend API completo**
   - Rutas: `POST /api/invitations`, `GET /api/invitations`, `DELETE /api/invitations/:id`
-  - Servicio de email con Gmail SMTP (rodrigo.desarrollador@gmail.com)
+  - Servicio de email con dominio propio (noreply@sharedance.com.ar)
+  - Postfix mail server configurado en VPS
   - Validaciones y manejo de errores robusto
   - Templates HTML responsive para emails
 
@@ -57,8 +58,9 @@ sharedance/
   - Estados de loading y error bien manejados
 
 - ✅ **Configuración de Email**
-  - Gmail SMTP configurado con App Password
-  - Variables de entorno seguras
+  - Servidor Postfix configurado (mail.sharedance.com.ar)
+  - Email desde dominio propio: noreply@sharedance.com.ar
+  - Variables de entorno actualizadas
   - Rate limiting para prevenir spam
   - Templates HTML con branding ShareDance
 
@@ -158,7 +160,7 @@ Build: Flutter build web --release con optimizaciones
 ### **Backend Stack**
 ```yaml
 Runtime: Node.js + Express.js
-Email: Nodemailer + Gmail SMTP
+Email: Nodemailer + Postfix SMTP (domain-based)
 Validation: Express-validator para inputs
 Security: CORS, helmet, rate-limiting
 Process Manager: PM2 con cluster mode
