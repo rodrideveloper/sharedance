@@ -23,7 +23,7 @@ function generateTemporaryPassword() {
     const numbers = Math.floor(Math.random() * 999) + 100;
     const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
     const year = new Date().getFullYear();
-    
+
     return `SD${year}-${adjective}${numbers}`;
 }
 
@@ -71,7 +71,7 @@ async function createFirebaseUser(email, temporaryPassword, role) {
         // Crear documento de usuario en Firestore
         const db = admin.firestore();
         const englishRole = mapRoleToEnglish(role);
-        
+
         await db.collection('users').doc(userRecord.uid).set({
             email: email.toLowerCase(),
             role: englishRole,
@@ -144,7 +144,7 @@ router.post('/send', authMiddleware, async (req, res) => {
         // Verificar si el usuario ya existe
         try {
             const existingUser = await admin.auth().getUserByEmail(email);
-            
+
             if (createUser) {
                 return res.status(400).json({
                     error: 'El usuario ya está registrado en el sistema'
@@ -154,16 +154,16 @@ router.post('/send', authMiddleware, async (req, res) => {
             // Si no encuentra el usuario y queremos crearlo
             if (authError.code === 'auth/user-not-found' && createUser) {
                 temporaryPassword = generateTemporaryPassword();
-                
+
                 const userResult = await createFirebaseUser(email, temporaryPassword, role);
-                
+
                 if (!userResult.success) {
                     return res.status(500).json({
                         error: 'Error creando el usuario',
                         details: userResult.error
                     });
                 }
-                
+
                 userCreated = true;
             } else if (authError.code !== 'auth/user-not-found') {
                 throw authError;
@@ -189,7 +189,7 @@ router.post('/send', authMiddleware, async (req, res) => {
 
         // Enviar email apropiado
         let emailResult;
-        
+
         if (userCreated && sendCredentials && temporaryPassword) {
             // Enviar email con credenciales
             emailResult = await emailService.sendWelcomeEmailWithCredentials(
@@ -217,7 +217,7 @@ router.post('/send', authMiddleware, async (req, res) => {
                 status: 'email_failed',
                 emailError: emailResult.error
             });
-            
+
             return res.status(500).json({
                 error: 'Usuario creado pero error enviando email',
                 details: emailResult.error,
@@ -231,8 +231,8 @@ router.post('/send', authMiddleware, async (req, res) => {
         });
 
         const response = {
-            message: userCreated 
-                ? 'Usuario creado y invitación enviada correctamente' 
+            message: userCreated
+                ? 'Usuario creado y invitación enviada correctamente'
                 : 'Invitación enviada correctamente',
             invitationId: invitationRef.id,
             messageId: emailResult.messageId,

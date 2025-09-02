@@ -1,8 +1,8 @@
 # 📊 ShareDance - Estado Completo del Proyecto
 
-> **Última actualización**: 1 de septiembre de 2025  
-> **Versión**: v2.0.0 - Monorepo con Dashboard  
-> **Estado general**: 78% completado - En desarrollo activo
+> **Última actualización**: 2 de septiembre de 2025  
+> **Versión**: v2.1.0 - Sistema de Invitaciones Avanzado  
+> **Estado general**: 85% completado - Sistema de usuarios automático en implementación
 
 ---
 
@@ -42,13 +42,32 @@ sharedance/
 
 ## ✅ **Funcionalidades Implementadas**
 
-### **📧 Sistema de Invitaciones (100% completo)**
+### **📧 Sistema de Invitaciones Avanzado (90% completo)**
 - ✅ **Backend API completo**
   - Rutas: `POST /api/invitations`, `GET /api/invitations`, `DELETE /api/invitations/:id`
   - Servicio de email con dominio propio (noreply@sharedance.com.ar)
   - Postfix mail server configurado en VPS
   - Validaciones y manejo de errores robusto
   - Templates HTML responsive para emails
+
+- ✅ **Sistema de Creación Automática de Usuarios**
+  - Endpoint específico: `POST /api/invitations/create-instructor`
+  - Generación automática de contraseñas temporales (formato: SD2025-Adjective123)
+  - Creación automática de usuarios en Firebase Auth
+  - Asignación de roles personalizada (instructor/admin/student)
+  - Configuración de custom claims en Firebase
+  - Envío automático de credenciales por email
+
+- ✅ **Templates de Email Profesionales**
+  - Email de bienvenida con credenciales incluidas
+  - Template HTML con diseño profesional ShareDance
+  - Instrucciones de seguridad para cambio de contraseña
+  - Soporte para modo desarrollo (Gmail) y producción (Postfix)
+
+- 🟡 **En implementación**
+  - Deployment final del sistema mejorado en VPS
+  - Testing completo del flujo de creación de instructores
+  - Integración con dashboard para opciones avanzadas
 
 - ✅ **Dashboard Flutter**
   - Interfaz Material 3 moderna y limpia
@@ -60,9 +79,9 @@ sharedance/
 - ✅ **Configuración de Email**
   - Servidor Postfix configurado (mail.sharedance.com.ar)
   - Email desde dominio propio: noreply@sharedance.com.ar
-  - Variables de entorno actualizadas
+  - DNS records configurados (MX, A, SPF)
+  - Autenticación SPF para entrega confiable
   - Rate limiting para prevenir spam
-  - Templates HTML con branding ShareDance
 
 ### **🌐 Dashboard Web (85% completo)**
 - ✅ **Estructura y Navegación**
@@ -119,6 +138,64 @@ sharedance/
 
 ## 🌍 **Entornos y URLs**
 
+---
+
+## 🚧 **Estado Actual del Desarrollo (Septiembre 2025)**
+
+### **🎯 Trabajo Completado Esta Sesión**
+- ✅ **Sistema de Creación Automática de Usuarios**
+  - Implementado generador de contraseñas temporales seguras
+  - Configurada integración con Firebase Auth para creación automática
+  - Desarrollado sistema de asignación de roles (instructor/admin/student)
+  - Creado endpoint específico `/api/invitations/create-instructor`
+
+- ✅ **Templates de Email Profesionales**
+  - Diseñado email de credenciales con información de acceso
+  - Implementadas instrucciones de seguridad para cambio de contraseña
+  - Creado sistema de detección de entorno (dev vs prod)
+
+- ✅ **Migración de Email a Dominio Propio**
+  - Migrado de Gmail SMTP a servidor Postfix en VPS
+  - Configurados registros DNS (MX, A, SPF) para sharedance.com.ar
+  - Establecida autenticación SPF para entrega confiable de emails
+  - Validado funcionamiento con Gmail y otros proveedores
+
+### **⚠️ Issues Actuales (Para mañana)**
+- 🔴 **Backend VPS en estado "waiting restart"**
+  - Servicios PM2 requieren debugging de logs
+  - Posible error en archivos actualizados de invitaciones
+  - Necesita revisión de dependencias y sintaxis
+
+- 🟡 **Testing Pendiente**
+  - Flujo completo de creación de instructor desde dashboard
+  - Validación de emails de credenciales en entorno producción
+  - Verificación de roles y custom claims en Firebase
+
+### **📋 Próximos Pasos Inmediatos**
+1. **Debugging del backend en VPS**
+   - Revisar logs de PM2 para identificar errores
+   - Verificar sintaxis de archivos `invitations.js` y `emailService.js`
+   - Restablecer servicios en estado operativo
+
+2. **Testing del sistema de usuarios**
+   - Probar endpoint `/api/invitations/create-instructor`
+   - Validar generación y envío de credenciales
+   - Verificar creación de usuarios en Firebase Auth
+
+3. **Integración con dashboard**
+   - Actualizar formulario de invitaciones con opción "Crear usuario"
+   - Implementar interfaz para creación directa de instructores
+   - Agregar feedback visual para proceso de creación
+
+4. **Documentación y guides**
+   - Actualizar documentación de API con nuevos endpoints
+   - Crear guía de uso para creación de instructores
+   - Documentar flujo de gestión de contraseñas temporales
+
+---
+
+## 🌐 **URLs y Accesos**
+
 ### **🧪 Staging Environment**
 - **Dashboard**: https://staging.sharedance.com.ar/dashboard/
 - **API Base**: https://staging.sharedance.com.ar/api/
@@ -132,7 +209,7 @@ sharedance/
 - **API Base**: https://sharedance.com.ar/api/
 - **Backend Port**: 3002
 - **SSL**: ✅ Let's Encrypt válido
-- **Estado**: ✅ Operativo y funcional
+- **Estado**: ⚠️ Requiere debugging (PM2 waiting restart)
 - **PM2 Process**: `sharedance-production`
 
 ### **🖥️ VPS Infrastructure**
@@ -259,7 +336,70 @@ xl: 32px  // Espaciado extra grande
 
 ---
 
-## 🔐 **Seguridad Implementada**
+## � **Sistema de Gestión de Usuarios (Nuevo)**
+
+### **Creación Automática de Usuarios**
+```javascript
+// Endpoint: POST /api/invitations/create-instructor
+{
+  "email": "instructor@example.com",
+  "firstName": "Nombre", 
+  "lastName": "Apellido",
+  "phone": "+549112345678"
+}
+```
+
+### **Generación de Contraseñas Temporales**
+```javascript
+// Formato: SD2025-[Adjetivo][Número]
+// Ejemplo: SD2025-Agil123, SD2025-Fuerte456
+function generateTemporaryPassword() {
+  const adjectives = ['Agil', 'Fuerte', 'Veloz', 'Elegante', 'Dinamico'];
+  const number = Math.floor(Math.random() * 900) + 100;
+  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  return `SD2025-${adjective}${number}`;
+}
+```
+
+### **Integración Firebase Auth**
+```javascript
+// Creación automática de usuario
+const userRecord = await admin.auth().createUser({
+  email: email,
+  password: temporaryPassword,
+  displayName: `${firstName} ${lastName}`,
+  emailVerified: false
+});
+
+// Asignación de custom claims
+await admin.auth().setCustomUserClaims(userRecord.uid, {
+  role: 'instructor',
+  createdBy: 'dashboard',
+  temporaryPassword: true
+});
+```
+
+### **Sistema de Roles**
+- **student**: Acceso a reservas y clases
+- **instructor**: Gestión de clases asignadas
+- **admin**: Acceso completo al dashboard
+
+### **Templates de Email**
+```html
+<!-- Email con credenciales de acceso -->
+<div class="credentials-box">
+  <h3>Sus credenciales de acceso:</h3>
+  <p><strong>Email:</strong> instructor@example.com</p>
+  <p><strong>Contraseña temporal:</strong> SD2025-Agil123</p>
+  <p class="security-warning">
+    ⚠️ Por seguridad, deberá cambiar esta contraseña en su primer acceso.
+  </p>
+</div>
+```
+
+---
+
+## �🔐 **Seguridad Implementada**
 
 ### **Backend Security**
 - ✅ **Input Validation**: Express-validator en todas las rutas
@@ -443,7 +583,63 @@ ssh -i ~/.ssh/rodrigo_vps ubuntu@148.113.197.152 "pm2 restart all && systemctl r
 
 ---
 
-## 📞 **Contactos y Referencias**
+## � **Estado de Archivos Críticos**
+
+### **Backend - Sistema de Invitaciones**
+```bash
+# Archivos principales actualizados:
+backend/server/src/routes/invitations.js          # ✅ Enhanced con auto-user creation
+backend/server/src/services/emailService.js       # ✅ Complete con credential templates
+
+# Archivos de respaldo creados:
+backend/server/src/routes/invitations_backup.js   # ✅ Backup original
+backend/server/src/services/emailService_backup.js # ✅ Backup original
+
+# Estado VPS: ⚠️ Archivos subidos, servicios requieren debugging
+```
+
+### **Funcionalidades Mejoradas en Archivos**
+
+#### **invitations.js (337 lines)**
+- ✅ Endpoint `/api/invitations/create-instructor`
+- ✅ Generación automática de contraseñas temporales
+- ✅ Integración con Firebase Auth
+- ✅ Sistema de asignación de roles
+- ✅ Validaciones mejoradas
+
+#### **emailService.js (413 lines)**  
+- ✅ Método `sendWelcomeEmailWithCredentials()`
+- ✅ Templates HTML profesionales para credenciales
+- ✅ Detección de entorno (Gmail dev vs Postfix prod)
+- ✅ Configuración SPF para autenticación de dominio
+
+### **Debugging Necesario Mañana**
+1. **PM2 Services Status**
+   ```bash
+   ssh ubuntu@148.113.197.152 'cd /opt/sharedance && pm2 logs --lines 20'
+   ```
+
+2. **Syntax Check**
+   ```bash
+   ssh ubuntu@148.113.197.152 'cd /opt/sharedance && node -c routes/invitations.js'
+   ssh ubuntu@148.113.197.152 'cd /opt/sharedance && node -c services/emailService.js'
+   ```
+
+3. **Dependencies Verification**
+   ```bash
+   ssh ubuntu@148.113.197.152 'cd /opt/sharedance && npm list --depth=0'
+   ```
+
+### **Testing Plan para Mañana**
+1. Restablecer servicios PM2 en estado operativo
+2. Probar endpoint `POST /api/invitations/create-instructor`
+3. Validar creación de usuario en Firebase Auth Console
+4. Confirmar envío de email con credenciales temporales
+5. Verificar funcionalidad de cambio de contraseña obligatorio
+
+---
+
+## �📞 **Contactos y Referencias**
 
 ### **Configuraciones Críticas**
 - **Gmail SMTP**: rodrigo.desarrollador@gmail.com (App Password configurado)

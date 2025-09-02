@@ -131,7 +131,13 @@ class EmailService {
             'admin': 'Administrador',
             'instructor': 'Instructor',
             'student': 'Estudiante',
-            'manager': 'Gerente'
+            'manager': 'Gerente',
+            'Profesor': 'Profesor',
+            'Teacher': 'Profesor',
+            'Administrador': 'Administrador',
+            'Admin': 'Administrador',
+            'Estudiante': 'Estudiante',
+            'Student': 'Estudiante'
         };
         return roleNames[role] || 'Usuario';
     }
@@ -307,6 +313,165 @@ class EmailService {
                     
                     <p style="font-size: 12px; color: #999;">
                         Si no esperabas este email, puedes ignorarlo de forma segura.
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+    }
+
+    generateCredentialsHTML(userEmail, userName, userRole, temporaryPassword, inviterName, customMessage) {
+        const roleDisplayName = this.getRoleDisplayName(userRole);
+        const baseUrl = process.env.FRONTEND_URL || 'https://sharedance.com.ar';
+        const dashboardUrl = `${baseUrl}/dashboard`;
+
+        return `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Credenciales ShareDance</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                }
+                .container {
+                    background-color: white;
+                    border-radius: 12px;
+                    padding: 40px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    padding-bottom: 20px;
+                    border-bottom: 2px solid #e0e0e0;
+                }
+                .logo {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #6366f1;
+                    margin-bottom: 10px;
+                }
+                .credentials-box {
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    padding: 25px;
+                    border-radius: 8px;
+                    text-align: center;
+                    margin: 25px 0;
+                }
+                .credential-item {
+                    background-color: rgba(255,255,255,0.2);
+                    padding: 12px 20px;
+                    border-radius: 6px;
+                    margin: 10px 0;
+                    font-family: monospace;
+                    font-size: 16px;
+                    word-break: break-all;
+                }
+                .warning-box {
+                    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin: 20px 0;
+                    text-align: center;
+                }
+                .cta-button {
+                    display: inline-block;
+                    background-color: #6366f1;
+                    color: white;
+                    padding: 15px 30px;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    margin: 20px 0;
+                }
+                .footer {
+                    text-align: center;
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    border-top: 1px solid #e0e0e0;
+                    color: #666;
+                    font-size: 14px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">💃 ShareDance</div>
+                    <div>Plataforma de gestión de clases de baile</div>
+                </div>
+
+                <div>
+                    <h2>¡Bienvenido/a a ShareDance, ${userName}!</h2>
+                    
+                    <p><strong>${inviterName}</strong> te ha creado una cuenta como <strong>${roleDisplayName}</strong>.</p>
+
+                    <div class="credentials-box">
+                        <h3>🔐 Tus credenciales de acceso</h3>
+                        <div style="margin: 20px 0;">
+                            <p><strong>Email:</strong></p>
+                            <div class="credential-item">${userEmail}</div>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            <p><strong>Contraseña temporal:</strong></p>
+                            <div class="credential-item">${temporaryPassword}</div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>⚠️ IMPORTANTE: Cambio de contraseña requerido</h4>
+                        <p>Por seguridad, deberás cambiar tu contraseña en el primer inicio de sesión.</p>
+                    </div>
+
+                    ${customMessage ? `
+                    <div style="background-color: #f8fafc; border-left: 4px solid #6366f1; padding: 20px; margin: 20px 0;">
+                        <h4>📝 Mensaje personal:</h4>
+                        <p>${customMessage}</p>
+                    </div>
+                    ` : ''}
+
+                    <div style="text-align: center;">
+                        <a href="${dashboardUrl}" class="cta-button">
+                            🚀 Acceder al Dashboard
+                        </a>
+                    </div>
+
+                    <h3>🎭 Funciones de ShareDance:</h3>
+                    <ul>
+                        <li><strong>Gestionar clases</strong> - Crea y administra clases de baile</li>
+                        <li><strong>Sistema de créditos</strong> - Maneja créditos y reservas</li>
+                        <li><strong>Reservas en tiempo real</strong> - Sistema de reservas inteligente</li>
+                        <li><strong>Comunicación directa</strong> - Chat con estudiantes e instructores</li>
+                    </ul>
+
+                    <p><strong>Pasos para empezar:</strong></p>
+                    <ol>
+                        <li>Haz clic en "Acceder al Dashboard"</li>
+                        <li>Inicia sesión con las credenciales de arriba</li>
+                        <li>Cambia tu contraseña por una nueva y segura</li>
+                        <li>Completa tu perfil y ¡empieza a usar ShareDance!</li>
+                    </ol>
+                </div>
+
+                <div class="footer">
+                    <p>ShareDance - Plataforma de gestión de clases de baile<br>
+                    <a href="https://sharedance.com.ar">sharedance.com.ar</a></p>
+                    
+                    <p style="font-size: 12px; color: #999;">
+                        Por favor, no compartas estas credenciales con nadie.<br>
+                        Si no solicitaste esta cuenta, ignora este email.
                     </p>
                 </div>
             </div>
