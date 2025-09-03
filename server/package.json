@@ -1,0 +1,36 @@
+{
+    "name": "sharedance-server",
+    "version": "1.0.0",
+    "description": "ShareDance Node.js Server",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "start:staging": "NODE_ENV=staging node index.js",
+        "start:production": "NODE_ENV=production node index.js",
+        "dev:staging": "NODE_ENV=staging nodemon index.js",
+        "dev:production": "NODE_ENV=production nodemon index.js",
+        "pm2:staging": "pm2 start ecosystem.config.json --only sharedance-staging",
+        "pm2:production": "pm2 start ecosystem.config.json --only sharedance-production",
+        "pm2:both": "pm2 start ecosystem.config.json",
+        "setup": "./setup.sh"
+    },
+    "dependencies": {
+        "compression": "^1.7.4",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "firebase-admin": "^12.0.0",
+        "helmet": "^7.0.0",
+        "joi": "^17.13.3",
+        "morgan": "^1.10.0",
+        "node-cron": "^3.0.3",
+        "nodemailer": "^7.0.6"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
