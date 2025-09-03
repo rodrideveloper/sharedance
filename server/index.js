@@ -181,6 +181,11 @@ app.get('/dashboard', (req, res) => {
     try {
         let html = fs.readFileSync(indexPath, 'utf8');
 
+        // Add cache busting to all Flutter assets
+        const cacheVersion = Date.now(); // Use timestamp as version
+        html = html.replace(/src="([^"]*\.js)"/g, `src="$1?v=${cacheVersion}"`);
+        html = html.replace(/href="([^"]*\.css)"/g, `href="$1?v=${cacheVersion}"`);
+
         // Inject environment variables into the HTML
         const envData = {
             NODE_ENV: config.nodeEnv,
@@ -214,6 +219,11 @@ app.get('/dashboard/', (req, res) => {
 
     try {
         let html = fs.readFileSync(indexPath, 'utf8');
+
+        // Add cache busting to all Flutter assets
+        const cacheVersion = Date.now(); // Use timestamp as version
+        html = html.replace(/src="([^"]*\.js)"/g, `src="$1?v=${cacheVersion}"`);
+        html = html.replace(/href="([^"]*\.css)"/g, `href="$1?v=${cacheVersion}"`);
 
         // Inject environment variables into the HTML
         const envData = {
