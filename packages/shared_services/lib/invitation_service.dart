@@ -86,7 +86,8 @@ class InvitationService {
       if (response.statusCode == 201) {
         return InvitationResponse(
           success: true,
-          message: data['message'] ?? 'Instructor creado y email enviado correctamente',
+          message: data['message'] ??
+              'Instructor creado y email enviado correctamente',
           invitationId: data['invitationId'],
         );
       } else {
@@ -129,9 +130,10 @@ class InvitationService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final invitationsJson = data['invitations'] as List<dynamic>;
-        
+
         return invitationsJson
-            .map((json) => InvitationModel.fromJson(json as Map<String, dynamic>))
+            .map((json) =>
+                InvitationModel.fromJson(json as Map<String, dynamic>))
             .toList();
       } else {
         // Si hay error, retornar lista vacía en lugar de crash

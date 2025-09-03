@@ -8,13 +8,21 @@ import 'features/invitations/presentation/bloc/invitations_bloc.dart';
 import 'features/invitations/presentation/pages/invitations_page.dart';
 import 'core/config/app_config.dart';
 import 'core/auth/auth_service.dart';
-import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Inicializar Firebase con configuración básica para web
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "your-api-key",
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project-id",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "your-app-id",
+    ),
+  );
 
   runApp(const ShareDanceWithInvitationsApp());
 }
