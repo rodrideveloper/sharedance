@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_services/shared_services.dart';
 import 'firebase_options.dart';
@@ -19,20 +20,19 @@ class ShareDanceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<String?>(
-      stream: AuthService.getIdTokenStream(),
-      builder: (context, tokenSnapshot) {
-        final authToken = tokenSnapshot.data;
-        
+    return StreamBuilder<User?>(
+      stream: AuthService.authStateChanges,
+      builder: (context, userSnapshot) {
         return MultiBlocProvider(
           providers: [
             BlocProvider<InvitationsBloc>(
-              create: (context) => InvitationsBloc(
-                invitationService: InvitationService(
-                  baseUrl: AppConfig.baseUrl,
-                  authToken: authToken,
-                ),
-              ),
+              create:
+                  (context) => InvitationsBloc(
+                    invitationService: InvitationService(
+                      baseUrl: AppConfig.baseUrl,
+                      getAuthToken: () async => await AuthService.getIdToken(),
+                    ),
+                  ),
             ),
           ],
           child: MaterialApp.router(
@@ -64,18 +64,26 @@ class ShareDanceApp extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                 ),
               ),
               inputDecorationTheme: InputDecorationTheme(
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Colors.grey),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF6366F1),
+                    width: 2,
+                  ),
                 ),
               ),
             ),

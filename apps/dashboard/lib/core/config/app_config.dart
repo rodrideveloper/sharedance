@@ -10,7 +10,7 @@ class AppConfig {
       // For localhost development, use staging backend
       return 'https://staging.sharedance.com.ar';
     }
-    
+
     switch (_flavor) {
       case 'staging':
         return 'https://staging.sharedance.com.ar';
@@ -27,7 +27,7 @@ class AppConfig {
     }
     return _flavor == 'staging';
   }
-  
+
   static bool get isProduction => !isStaging;
 
   static String get environment {

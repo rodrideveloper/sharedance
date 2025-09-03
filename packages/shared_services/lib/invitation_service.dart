@@ -5,18 +5,27 @@ import 'dart:convert';
 class InvitationService {
   final String baseUrl;
   final String? authToken;
+  final Future<String?> Function()? getAuthToken;
 
   InvitationService({
     required this.baseUrl,
     this.authToken,
+    this.getAuthToken,
   });
 
-  Map<String, String> get _headers {
+  Future<Map<String, String>> get _headers async {
     final headers = {
       'Content-Type': 'application/json',
     };
-    if (authToken != null) {
-      headers['Authorization'] = 'Bearer $authToken';
+
+    // Usar getAuthToken si está disponible, sino usar authToken
+    String? token = authToken;
+    if (getAuthToken != null) {
+      token = await getAuthToken!();
+    }
+
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
     }
     return headers;
   }
@@ -30,7 +39,7 @@ class InvitationService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/invitations'),
-        headers: _headers,
+        headers: await _headers,
         body: jsonEncode({
           'email': email,
           'role': _roleToString(role),
@@ -72,7 +81,7 @@ class InvitationService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/invitations/create-instructor'),
-        headers: _headers,
+        headers: await _headers,
         body: jsonEncode({
           'email': email,
           'firstName': firstName,
@@ -125,7 +134,7 @@ class InvitationService {
         queryParameters: queryParams,
       );
 
-      final response = await http.get(uri, headers: _headers);
+      final response = await http.get(uri, headers: await _headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -152,7 +161,7 @@ class InvitationService {
     try {
       final response = await http.delete(
         Uri.parse('$baseUrl/api/invitations/$invitationId'),
-        headers: _headers,
+        headers: await _headers,
       );
 
       return response.statusCode == 200;
@@ -167,7 +176,7 @@ class InvitationService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/invitations/$invitationId/resend'),
-        headers: _headers,
+        headers: await _headers,
       );
 
       return response.statusCode == 200;
