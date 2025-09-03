@@ -142,6 +142,40 @@ app.get('/', (req, res) => {
     }
 });
 
+// Serve dashboard route
+app.get('/dashboard*', (req, res) => {
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+
+    try {
+        let html = fs.readFileSync(indexPath, 'utf8');
+
+        // Inject environment variables into the HTML
+        const envData = {
+            NODE_ENV: config.nodeEnv,
+            IS_STAGING: config.nodeEnv === 'staging',
+            IS_PRODUCTION: config.nodeEnv === 'production',
+            API_URL: `http://localhost:${config.port}`,
+            FIREBASE_PROJECT: config.firebase.projectId
+        };
+
+        // Replace placeholder or add script with environment data
+        const envScript = `
+        <script>
+            window.ENV = ${JSON.stringify(envData)};
+            console.log('Environment loaded:', window.ENV);
+        </script>`;
+
+        // Insert the script before the closing </head> tag
+        html = html.replace('</head>', `${envScript}\n</head>`);
+
+        res.set('Content-Type', 'text/html');
+        res.send(html);
+    } catch (error) {
+        console.error('Error serving dashboard:', error);
+        res.status(500).send('Error loading dashboard');
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.status(200).json({
