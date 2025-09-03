@@ -109,8 +109,26 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from public directory (except index.html)
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
-// Serve static files under /dashboard path as well
-app.use('/dashboard', express.static(path.join(__dirname, 'public'), { index: false }));
+// Priority: Serve static files under /dashboard path first
+app.use('/dashboard', (req, res, next) => {
+    // If it's a request for a static file (has extension), serve it directly
+    if (req.path.includes('.')) {
+        return express.static(path.join(__dirname, 'public'), { 
+            index: false,
+            setHeaders: (res, path) => {
+                if (path.endsWith('.js')) {
+                    res.setHeader('Content-Type', 'application/javascript');
+                } else if (path.endsWith('.css')) {
+                    res.setHeader('Content-Type', 'text/css');
+                } else if (path.endsWith('.wasm')) {
+                    res.setHeader('Content-Type', 'application/wasm');
+                }
+            }
+        })(req, res, next);
+    }
+    // If no extension, continue to route handlers
+    next();
+});
 
 // Serve dynamic index.html with environment variables injected
 app.get('/', (req, res) => {
@@ -146,7 +164,7 @@ app.get('/', (req, res) => {
     }
 });
 
-// Serve dashboard route (only for HTML, not static files)
+// Serve dashboard route (only for HTML requests, not static files)
 app.get('/dashboard', (req, res) => {
     const indexPath = path.join(__dirname, 'public', 'index.html');
 
