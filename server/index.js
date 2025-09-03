@@ -116,7 +116,7 @@ app.use(express.static(path.join(__dirname, 'landing'), { index: false }));
 app.use('/dashboard', (req, res, next) => {
     // If it's a request for a static file (has extension), serve it directly
     if (req.path.includes('.')) {
-        return express.static(path.join(__dirname, 'public'), { 
+        return express.static(path.join(__dirname, 'public'), {
             index: false,
             setHeaders: (res, path) => {
                 if (path.endsWith('.js')) {
