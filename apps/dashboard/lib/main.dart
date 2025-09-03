@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_services/shared_services.dart';
 import 'firebase_options.dart';
 import 'core/routing/app_router.dart';
+import 'core/config/app_config.dart';
+import 'core/auth/auth_service.dart';
+import 'features/invitations/presentation/bloc/invitations_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const ShareDanceApp());
 }
 
@@ -16,46 +19,69 @@ class ShareDanceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'ShareDance Dashboard',
-      debugShowCheckedModeBanner: false,
-      routerConfig: AppRouter.router,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6366F1),
-          brightness: Brightness.light,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          elevation: 0,
-          centerTitle: false,
-        ),
-        cardTheme: CardTheme(
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF6366F1),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+    return StreamBuilder<String?>(
+      stream: AuthService.getIdTokenStream(),
+      builder: (context, tokenSnapshot) {
+        final authToken = tokenSnapshot.data;
+        
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<InvitationsBloc>(
+              create: (context) => InvitationsBloc(
+                invitationService: InvitationService(
+                  baseUrl: AppConfig.baseUrl,
+                  authToken: authToken,
+                ),
+              ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ],
+          child: MaterialApp.router(
+            title: 'ShareDance Dashboard',
+            debugShowCheckedModeBanner: false,
+            routerConfig: AppRouter.router,
+            theme: ThemeData(
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF6366F1),
+                brightness: Brightness.light,
+              ),
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black87,
+                elevation: 0,
+                centerTitle: false,
+              ),
+              cardTheme: CardTheme(
+                elevation: 1,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6366F1),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                ),
+              ),
+            ),
           ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

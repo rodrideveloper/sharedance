@@ -183,7 +183,7 @@ class InvitationService {
       case UserRole.admin:
         return 'Admin';
       case UserRole.teacher:
-        return 'Teacher';  // Mayúscula para coincidir con backend
+        return 'Teacher'; // Mayúscula para coincidir con backend
       case UserRole.student:
         return 'Student';
     }

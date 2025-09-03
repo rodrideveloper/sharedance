@@ -8,7 +8,7 @@ admin.initializeApp({
 async function createAdminUser() {
     try {
         console.log('🔐 Creating admin user in Firebase Authentication...');
-        
+
         // Create user in Firebase Authentication
         const userRecord = await admin.auth().createUser({
             email: 'admin@admin.com',
@@ -19,13 +19,13 @@ async function createAdminUser() {
         });
 
         console.log('✅ Successfully created admin user:', userRecord.uid);
-        
+
         // Set custom claims for admin role
         await admin.auth().setCustomUserClaims(userRecord.uid, {
             role: 'admin',
             temporaryPassword: false
         });
-        
+
         console.log('✅ Set admin role custom claims');
 
         // Also create/update the user document in Firestore
@@ -47,7 +47,7 @@ async function createAdminUser() {
         console.log('🎉 Admin user setup complete!');
         console.log('📧 Email: admin@admin.com');
         console.log('🔒 Password: 123456');
-        
+
     } catch (error) {
         if (error.code === 'auth/email-already-exists') {
             console.log('⚠️  User already exists, updating custom claims...');

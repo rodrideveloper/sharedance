@@ -93,8 +93,8 @@ app.use(helmet({
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
             connectSrc: [
-                "'self'", 
-                "https://www.gstatic.com", 
+                "'self'",
+                "https://www.gstatic.com",
                 "https://fonts.gstatic.com",
                 "https://identitytoolkit.googleapis.com",
                 "https://securetoken.googleapis.com",
