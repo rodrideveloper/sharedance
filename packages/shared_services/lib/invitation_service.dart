@@ -183,7 +183,7 @@ class InvitationService {
       case UserRole.admin:
         return 'admin';
       case UserRole.teacher:
-        return 'instructor';
+        return 'teacher';  // Cambiado de 'instructor' a 'teacher'
       case UserRole.student:
         return 'student';
     }
