@@ -92,7 +92,15 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://www.gstatic.com", "https://fonts.gstatic.com"],
+            connectSrc: [
+                "'self'", 
+                "https://www.gstatic.com", 
+                "https://fonts.gstatic.com",
+                "https://identitytoolkit.googleapis.com",
+                "https://securetoken.googleapis.com",
+                "https://firestore.googleapis.com",
+                "https://firebase.googleapis.com"
+            ],
             fontSrc: ["'self'", "https:", "data:", "https://fonts.gstatic.com"]
         }
     }
