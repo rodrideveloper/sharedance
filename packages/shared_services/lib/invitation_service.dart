@@ -181,11 +181,11 @@ class InvitationService {
   String _roleToString(UserRole role) {
     switch (role) {
       case UserRole.admin:
-        return 'admin';
+        return 'Admin';
       case UserRole.teacher:
-        return 'teacher';  // Cambiado de 'instructor' a 'teacher'
+        return 'Teacher';  // Mayúscula para coincidir con backend
       case UserRole.student:
-        return 'student';
+        return 'Student';
     }
   }
 }
