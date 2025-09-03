@@ -11,7 +11,7 @@ async function createAdminUser() {
         
         // Create user in Firebase Authentication
         const userRecord = await admin.auth().createUser({
-            email: 'admin@sharedance.com',
+            email: 'admin@admin.com',
             password: '123456',
             displayName: 'Admin Usuario',
             emailVerified: true,
@@ -32,7 +32,7 @@ async function createAdminUser() {
         const db = admin.firestore();
         await db.collection('users').doc(userRecord.uid).set({
             id: userRecord.uid,
-            email: 'admin@sharedance.com',
+            email: 'admin@admin.com',
             name: 'Admin Usuario',
             phone: '+1234567890',
             role: 'admin',
@@ -45,19 +45,19 @@ async function createAdminUser() {
 
         console.log('✅ Created user document in Firestore');
         console.log('🎉 Admin user setup complete!');
-        console.log('📧 Email: admin@sharedance.com');
+        console.log('📧 Email: admin@admin.com');
         console.log('🔒 Password: 123456');
         
     } catch (error) {
         if (error.code === 'auth/email-already-exists') {
             console.log('⚠️  User already exists, updating custom claims...');
-            const userRecord = await admin.auth().getUserByEmail('admin@sharedance.com');
+            const userRecord = await admin.auth().getUserByEmail('admin@admin.com');
             await admin.auth().setCustomUserClaims(userRecord.uid, {
                 role: 'admin',
                 temporaryPassword: false
             });
             console.log('✅ Updated admin role custom claims');
-            console.log('📧 Email: admin@sharedance.com');
+            console.log('📧 Email: admin@admin.com');
             console.log('🔒 Password: (existing password)');
         } else {
             console.error('❌ Error creating admin user:', error);
