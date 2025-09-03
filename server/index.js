@@ -121,10 +121,17 @@ app.use('/dashboard', (req, res, next) => {
             setHeaders: (res, path) => {
                 if (path.endsWith('.js')) {
                     res.setHeader('Content-Type', 'application/javascript');
+                    // Set shorter cache for JS files to avoid Cloudflare caching issues
+                    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes
                 } else if (path.endsWith('.css')) {
                     res.setHeader('Content-Type', 'text/css');
+                    res.setHeader('Cache-Control', 'public, max-age=300');
                 } else if (path.endsWith('.wasm')) {
                     res.setHeader('Content-Type', 'application/wasm');
+                    res.setHeader('Cache-Control', 'public, max-age=300');
+                } else {
+                    // For other files (images, etc), use longer cache
+                    res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
                 }
             }
         })(req, res, next);
