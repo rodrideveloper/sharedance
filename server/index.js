@@ -109,6 +109,9 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from public directory (except index.html)
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
+// Serve static files from landing directory for favicon and assets (except index.html)
+app.use(express.static(path.join(__dirname, 'landing'), { index: false }));
+
 // Priority: Serve static files under /dashboard path first
 app.use('/dashboard', (req, res, next) => {
     // If it's a request for a static file (has extension), serve it directly
@@ -130,14 +133,14 @@ app.use('/dashboard', (req, res, next) => {
     next();
 });
 
-// Serve dynamic index.html with environment variables injected
+// Serve landing page at root
 app.get('/', (req, res) => {
-    const indexPath = path.join(__dirname, 'public', 'index.html');
+    const landingPath = path.join(__dirname, 'landing', 'index.html');
 
     try {
-        let html = fs.readFileSync(indexPath, 'utf8');
+        let html = fs.readFileSync(landingPath, 'utf8');
 
-        // Inject environment variables into the HTML
+        // Inject environment variables into the HTML (optional for landing)
         const envData = {
             NODE_ENV: config.nodeEnv,
             IS_STAGING: config.nodeEnv === 'staging',
@@ -159,8 +162,8 @@ app.get('/', (req, res) => {
         res.set('Content-Type', 'text/html');
         res.send(html);
     } catch (error) {
-        console.error('Error serving index.html:', error);
-        res.status(500).send('Error loading page');
+        console.error('Error serving landing page:', error);
+        res.status(500).send('Error loading landing page');
     }
 });
 
