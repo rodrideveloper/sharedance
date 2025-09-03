@@ -108,6 +108,9 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from public directory (except index.html)
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
+// Serve static files under /dashboard path as well
+app.use('/dashboard', express.static(path.join(__dirname, 'public'), { index: false }));
+
 // Serve dynamic index.html with environment variables injected
 app.get('/', (req, res) => {
     const indexPath = path.join(__dirname, 'public', 'index.html');
