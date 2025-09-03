@@ -25,28 +25,29 @@ class AdminDashboard extends StatelessWidget {
                   break;
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'profile',
-                child: Row(
-                  children: [
-                    Icon(Icons.person),
-                    SizedBox(width: 8),
-                    Text('Cambiar Contraseña'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 8),
-                    Text('Cerrar Sesión'),
-                  ],
-                ),
-              ),
-            ],
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'profile',
+                    child: Row(
+                      children: [
+                        Icon(Icons.person),
+                        SizedBox(width: 8),
+                        Text('Cambiar Contraseña'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout),
+                        SizedBox(width: 8),
+                        Text('Cerrar Sesión'),
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
@@ -118,7 +119,8 @@ class AdminDashboard extends StatelessWidget {
                     title: 'Usuarios',
                     subtitle: 'Gestionar estudiantes y profesores',
                     color: Colors.green,
-                    onTap: () => _showComingSoon(context, 'Gestión de Usuarios'),
+                    onTap:
+                        () => _showComingSoon(context, 'Gestión de Usuarios'),
                   ),
                   _AdminTile(
                     icon: Icons.calendar_today,
@@ -208,11 +210,7 @@ class _AdminTile extends StatelessWidget {
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  size: 32,
-                  color: color,
-                ),
+                child: Icon(icon, size: 32, color: color),
               ),
               const SizedBox(height: 12),
               Text(
@@ -227,10 +225,7 @@ class _AdminTile extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF6B7280),
-                ),
+                style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
                 textAlign: TextAlign.center,
               ),
             ],

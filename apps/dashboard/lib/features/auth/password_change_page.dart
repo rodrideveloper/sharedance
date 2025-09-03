@@ -100,20 +100,21 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _isMandatory
-          ? AppBar(
-              title: const Text('Cambio de Contraseña Obligatorio'),
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.orange.shade600,
-              foregroundColor: Colors.white,
-            )
-          : AppBar(
-              title: const Text('Cambiar Contraseña'),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.pop(),
+      appBar:
+          _isMandatory
+              ? AppBar(
+                title: const Text('Cambio de Contraseña Obligatorio'),
+                automaticallyImplyLeading: false,
+                backgroundColor: Colors.orange.shade600,
+                foregroundColor: Colors.white,
+              )
+              : AppBar(
+                title: const Text('Cambiar Contraseña'),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => context.pop(),
+                ),
               ),
-            ),
       body: Container(
         padding: const EdgeInsets.all(24),
         child: Center(
@@ -137,7 +138,10 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.warning_amber, color: Colors.orange.shade600),
+                          Icon(
+                            Icons.warning_amber,
+                            color: Colors.orange.shade600,
+                          ),
                           const SizedBox(width: 12),
                           const Expanded(
                             child: Text(
@@ -154,12 +158,16 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
                     controller: _currentPasswordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      labelText: _isMandatory ? 'Contraseña temporal' : 'Contraseña actual',
+                      labelText:
+                          _isMandatory
+                              ? 'Contraseña temporal'
+                              : 'Contraseña actual',
                       prefixIcon: const Icon(Icons.lock_outlined),
                       border: const OutlineInputBorder(),
-                      helperText: _isMandatory 
-                          ? 'Usa la contraseña que recibiste por email'
-                          : null,
+                      helperText:
+                          _isMandatory
+                              ? 'Usa la contraseña que recibiste por email'
+                              : null,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -250,7 +258,10 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.check_circle_outline, color: Colors.green.shade600),
+                          Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.green.shade600,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -273,22 +284,25 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    child:
+                        _isLoading
+                            ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                            : const Text(
+                              'Cambiar Contraseña',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          )
-                        : const Text(
-                            'Cambiar Contraseña',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                   ),
 
                   // Cancel button (only if not mandatory)

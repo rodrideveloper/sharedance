@@ -8,3 +8,4 @@ export 'room_model.dart';
 export 'purchase_model.dart';
 export 'report_model.dart';
 export 'invitation_model.dart';
+export 'invitation_response.dart';

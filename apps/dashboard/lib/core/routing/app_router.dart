@@ -15,12 +15,12 @@ class AppRouter {
       final isLoggedIn = user != null;
       final currentLocation = state.uri.toString();
       final isLoggingIn = currentLocation == '/login';
-      
+
       // If not logged in, redirect to login
       if (!isLoggedIn && !isLoggingIn) {
         return '/login';
       }
-      
+
       // If logged in and on login page, redirect to appropriate dashboard
       if (isLoggedIn && isLoggingIn) {
         final role = await AuthService.getCurrentUserRole();
@@ -35,20 +35,17 @@ class AppRouter {
             return '/login';
         }
       }
-      
+
       return null;
     },
     routes: [
       // Auth routes
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
         path: '/change-password',
         builder: (context, state) => const PasswordChangePage(),
       ),
-      
+
       // Admin routes
       GoRoute(
         path: '/admin',
@@ -60,7 +57,7 @@ class AppRouter {
           ),
         ],
       ),
-      
+
       // Instructor routes
       GoRoute(
         path: '/instructor',
@@ -72,17 +69,16 @@ class AppRouter {
           ),
         ],
       ),
-      
+
       // Student routes (future)
       GoRoute(
         path: '/student',
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Student Dashboard - Coming Soon'),
-          ),
-        ),
+        builder:
+            (context, state) => const Scaffold(
+              body: Center(child: Text('Student Dashboard - Coming Soon')),
+            ),
       ),
-      
+
       // Legacy redirect for backward compatibility
       GoRoute(
         path: '/dashboard',

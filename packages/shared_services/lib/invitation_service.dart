@@ -1,4 +1,6 @@
 import 'package:shared_models/shared_models.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class InvitationService {
   final String baseUrl;
@@ -9,28 +11,96 @@ class InvitationService {
     this.authToken,
   });
 
-  // Enviar invitación
+  Map<String, String> get _headers {
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    if (authToken != null) {
+      headers['Authorization'] = 'Bearer $authToken';
+    }
+    return headers;
+  }
+
+  // Enviar invitación (método original)
   Future<InvitationResponse> sendInvitation({
     required String email,
     required UserRole role,
     String? customMessage,
   }) async {
     try {
-      // En un caso real, aquí harías una petición HTTP al backend
-      // Por ahora simulamos la respuesta
-
-      await Future.delayed(const Duration(seconds: 2)); // Simular delay de red
-
-      // Simular respuesta exitosa
-      return InvitationResponse(
-        success: true,
-        message: 'Invitación enviada correctamente',
-        invitationId: 'inv_${DateTime.now().millisecondsSinceEpoch}',
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/invitations'),
+        headers: _headers,
+        body: jsonEncode({
+          'email': email,
+          'role': _roleToString(role),
+          'customMessage': customMessage,
+        }),
       );
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 201) {
+        return InvitationResponse(
+          success: true,
+          message: data['message'] ?? 'Invitación enviada correctamente',
+          invitationId: data['invitationId'],
+        );
+      } else {
+        return InvitationResponse(
+          success: false,
+          message: data['error'] ?? 'Error enviando invitación',
+          error: data['error'],
+        );
+      }
     } catch (e) {
       return InvitationResponse(
         success: false,
-        message: 'Error enviando invitación: $e',
+        message: 'Error de conexión: $e',
+        error: e.toString(),
+      );
+    }
+  }
+
+  // Crear instructor automáticamente
+  Future<InvitationResponse> createInstructor({
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String phone,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/invitations/create-instructor'),
+        headers: _headers,
+        body: jsonEncode({
+          'email': email,
+          'firstName': firstName,
+          'lastName': lastName,
+          'phone': phone,
+        }),
+      );
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 201) {
+        return InvitationResponse(
+          success: true,
+          message: data['message'] ?? 'Instructor creado y email enviado correctamente',
+          invitationId: data['invitationId'],
+        );
+      } else {
+        return InvitationResponse(
+          success: false,
+          message: data['error'] ?? 'Error creando instructor',
+          error: data['error'],
+        );
+      }
+    } catch (e) {
+      return InvitationResponse(
+        success: false,
+        message: 'Error de conexión: $e',
+        error: e.toString(),
       );
     }
   }
@@ -42,46 +112,50 @@ class InvitationService {
     int offset = 0,
   }) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      final queryParams = <String, String>{
+        'limit': limit.toString(),
+        'offset': offset.toString(),
+      };
+      if (status != null) {
+        queryParams['status'] = status;
+      }
 
-      // Datos simulados para desarrollo
-      return [
-        InvitationModel(
-          invitationId: '1',
-          email: 'profesor@ejemplo.com',
-          role: UserRole.teacher,
-          token: 'token123',
-          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-          expiresAt: DateTime.now().add(const Duration(days: 7)),
-          isUsed: false,
-          invitedByUserId: 'admin-id',
-          invitedByName: 'Admin User',
-        ),
-        InvitationModel(
-          invitationId: '2',
-          email: 'estudiante@ejemplo.com',
-          role: UserRole.student,
-          token: 'token456',
-          createdAt: DateTime.now().subtract(const Duration(days: 1)),
-          expiresAt: DateTime.now().add(const Duration(days: 6)),
-          isUsed: true,
-          usedAt: DateTime.now().subtract(const Duration(hours: 12)),
-          usedByUserId: 'student-id',
-          invitedByUserId: 'admin-id',
-          invitedByName: 'Admin User',
-        ),
-      ];
+      final uri = Uri.parse('$baseUrl/api/invitations').replace(
+        queryParameters: queryParams,
+      );
+
+      final response = await http.get(uri, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final invitationsJson = data['invitations'] as List<dynamic>;
+        
+        return invitationsJson
+            .map((json) => InvitationModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        // Si hay error, retornar lista vacía en lugar de crash
+        print('Error getting invitations: ${response.statusCode}');
+        return [];
+      }
     } catch (e) {
-      throw Exception('Error obteniendo invitaciones: $e');
+      print('Error getting invitations: $e');
+      // En caso de error, retornar lista vacía
+      return [];
     }
   }
 
   // Cancelar invitación
   Future<bool> cancelInvitation(String invitationId) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      return true;
+      final response = await http.delete(
+        Uri.parse('$baseUrl/api/invitations/$invitationId'),
+        headers: _headers,
+      );
+
+      return response.statusCode == 200;
     } catch (e) {
+      print('Error canceling invitation: $e');
       return false;
     }
   }
@@ -89,24 +163,27 @@ class InvitationService {
   // Reenviar invitación
   Future<bool> resendInvitation(String invitationId) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      return true;
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/invitations/$invitationId/resend'),
+        headers: _headers,
+      );
+
+      return response.statusCode == 200;
     } catch (e) {
+      print('Error resending invitation: $e');
       return false;
     }
   }
-}
 
-class InvitationResponse {
-  final bool success;
-  final String message;
-  final String? invitationId;
-  final String? error;
-
-  InvitationResponse({
-    required this.success,
-    required this.message,
-    this.invitationId,
-    this.error,
-  });
+  // Método auxiliar para convertir UserRole a String
+  String _roleToString(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return 'admin';
+      case UserRole.teacher:
+        return 'instructor';
+      case UserRole.student:
+        return 'student';
+    }
+  }
 }

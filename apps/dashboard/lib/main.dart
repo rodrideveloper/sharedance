@@ -42,16 +42,11 @@ class ShareDanceApp extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 16,
@@ -112,13 +107,16 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
         children: [
           NavigationRail(
             extended: MediaQuery.of(context).size.width > 800,
-            destinations: _navigationItems
-                .map((item) => NavigationRailDestination(
-                      icon: Icon(item.icon),
-                      selectedIcon: Icon(item.selectedIcon),
-                      label: Text(item.label),
-                    ))
-                .toList(),
+            destinations:
+                _navigationItems
+                    .map(
+                      (item) => NavigationRailDestination(
+                        icon: Icon(item.icon),
+                        selectedIcon: Icon(item.selectedIcon),
+                        label: Text(item.label),
+                      ),
+                    )
+                    .toList(),
             selectedIndex: _selectedIndex,
             onDestinationSelected: (index) {
               setState(() {
@@ -127,18 +125,14 @@ class _DashboardHomePageState extends State<DashboardHomePage> {
             },
             backgroundColor: Colors.white,
             indicatorColor: const Color(0xFF6366F1).withOpacity(0.2),
-            selectedIconTheme: const IconThemeData(
-              color: Color(0xFF6366F1),
-            ),
+            selectedIconTheme: const IconThemeData(color: Color(0xFF6366F1)),
             selectedLabelTextStyle: const TextStyle(
               color: Color(0xFF6366F1),
               fontWeight: FontWeight.w500,
             ),
           ),
           const VerticalDivider(thickness: 1, width: 1),
-          Expanded(
-            child: _navigationItems[_selectedIndex].page,
-          ),
+          Expanded(child: _navigationItems[_selectedIndex].page),
         ],
       ),
     );
@@ -177,18 +171,12 @@ class DashboardOverviewPage extends StatelessWidget {
           children: [
             const Text(
               'Bienvenido al Dashboard de ShareDance',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Gestiona invitaciones, usuarios y clases desde aquí',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 32),
             Expanded(
@@ -261,11 +249,7 @@ class DashboardOverviewPage extends StatelessWidget {
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  size: 32,
-                  color: color,
-                ),
+                child: Icon(icon, size: 32, color: color),
               ),
               const SizedBox(height: 16),
               Text(
@@ -279,10 +263,7 @@ class DashboardOverviewPage extends StatelessWidget {
               Text(
                 description,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -332,13 +313,15 @@ class InvitationsPreviewPage extends StatelessWidget {
                 const SizedBox(width: 16),
                 DropdownButton<String>(
                   value: 'Todas',
-                  items: ['Todas', 'Pendientes', 'Aceptadas', 'Rechazadas']
-                      .map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                  items:
+                      ['Todas', 'Pendientes', 'Aceptadas', 'Rechazadas'].map((
+                        String value,
+                      ) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                   onChanged: (String? value) {},
                 ),
               ],
@@ -387,7 +370,11 @@ class InvitationsPreviewPage extends StatelessWidget {
                             return _buildInvitationRow(
                               'profesor${index + 1}@example.com',
                               'Profesor',
-                              index % 3 == 0 ? 'Pendiente' : index % 3 == 1 ? 'Aceptada' : 'Rechazada',
+                              index % 3 == 0
+                                  ? 'Pendiente'
+                                  : index % 3 == 1
+                                  ? 'Aceptada'
+                                  : 'Rechazada',
                               '${index + 1}/12/2023',
                             );
                           },
@@ -404,7 +391,12 @@ class InvitationsPreviewPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInvitationRow(String email, String role, String status, String date) {
+  Widget _buildInvitationRow(
+    String email,
+    String role,
+    String status,
+    String date,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -415,9 +407,10 @@ class InvitationsPreviewPage extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: status == 'Pendiente'
-                    ? Colors.orange.withOpacity(0.1)
-                    : status == 'Aceptada'
+                color:
+                    status == 'Pendiente'
+                        ? Colors.orange.withOpacity(0.1)
+                        : status == 'Aceptada'
                         ? Colors.green.withOpacity(0.1)
                         : Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
@@ -425,9 +418,10 @@ class InvitationsPreviewPage extends StatelessWidget {
               child: Text(
                 status,
                 style: TextStyle(
-                  color: status == 'Pendiente'
-                      ? Colors.orange
-                      : status == 'Aceptada'
+                  color:
+                      status == 'Pendiente'
+                          ? Colors.orange
+                          : status == 'Aceptada'
                           ? Colors.green
                           : Colors.red,
                   fontSize: 12,
@@ -486,13 +480,15 @@ class InvitationsPreviewPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  items: ['Profesor', 'Administrador', 'Estudiante']
-                      .map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                  items:
+                      ['Profesor', 'Administrador', 'Estudiante'].map((
+                        String value,
+                      ) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                   onChanged: (String? value) {},
                 ),
                 const SizedBox(height: 16),

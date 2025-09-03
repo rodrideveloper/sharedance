@@ -84,7 +84,7 @@ class EmailService {
         try {
             // Generar reset password link
             const resetLink = await this.generatePasswordResetLink(userEmail);
-            
+
             // Extraer firstName y lastName del userName
             const nameParts = userName.split(' ');
             const firstName = nameParts[0] || '';
@@ -92,11 +92,11 @@ class EmailService {
 
             const subject = `¡Bienvenido a ShareDance! - Credenciales de acceso`;
             const htmlContent = this.createCredentialsEmailTemplate(
-                firstName, 
-                lastName, 
-                userEmail, 
-                temporaryPassword, 
-                resetLink, 
+                firstName,
+                lastName,
+                userEmail,
+                temporaryPassword,
+                resetLink,
                 userRole
             );
 
@@ -637,7 +637,7 @@ class EmailService {
                 url: 'https://sharedance.com.ar/dashboard/login?mode=reset-complete',
                 handleCodeInApp: false
             };
-            
+
             const resetLink = await admin.auth().generatePasswordResetLink(email, actionCodeSettings);
             return resetLink;
         } catch (error) {
@@ -651,8 +651,8 @@ class EmailService {
      */
     createCredentialsEmailTemplate(firstName, lastName, email, temporaryPassword, resetLink, role = 'instructor') {
         const userName = `${firstName} ${lastName}`;
-        const roleDisplayName = role === 'instructor' ? 'Instructor' : 
-                               role === 'admin' ? 'Administrador' : 'Usuario';
+        const roleDisplayName = role === 'instructor' ? 'Instructor' :
+            role === 'admin' ? 'Administrador' : 'Usuario';
         const dashboardUrl = 'https://sharedance.com.ar/dashboard/';
 
         return `

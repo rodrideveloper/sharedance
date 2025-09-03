@@ -1,11 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-enum UserRole {
-  admin,
-  instructor,
-  student,
-  unknown
-}
+enum UserRole { admin, instructor, student, unknown }
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -23,9 +18,9 @@ class AuthService {
 
       final idTokenResult = await user.getIdTokenResult();
       final claims = idTokenResult.claims;
-      
+
       final roleString = claims?['role'] as String?;
-      
+
       switch (roleString) {
         case 'admin':
           return UserRole.admin;
@@ -50,7 +45,7 @@ class AuthService {
 
       final idTokenResult = await user.getIdTokenResult();
       final claims = idTokenResult.claims;
-      
+
       return claims?['temporaryPassword'] == true;
     } catch (e) {
       print('Error checking temporary password: $e');
@@ -60,8 +55,8 @@ class AuthService {
 
   /// Sign in with email and password
   static Future<UserCredential?> signInWithEmailAndPassword(
-    String email, 
-    String password
+    String email,
+    String password,
   ) async {
     try {
       return await _auth.signInWithEmailAndPassword(
@@ -90,6 +85,19 @@ class AuthService {
   /// Send password reset email
   static Future<void> sendPasswordResetEmail(String email) async {
     await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  /// Get current user ID token for API authentication
+  static Future<String?> getIdToken() async {
+    try {
+      final user = getCurrentUser();
+      if (user == null) return null;
+
+      return await user.getIdToken();
+    } catch (e) {
+      print('Error getting ID token: $e');
+      return null;
+    }
   }
 
   /// Stream of auth state changes
