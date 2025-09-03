@@ -205,7 +205,11 @@ app.get('/dashboard', (req, res) => {
         // Insert the script before the closing </head> tag
         html = html.replace('</head>', `${envScript}\n</head>`);
 
+        // Add cache busting header to the HTML response itself
         res.set('Content-Type', 'text/html');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
         res.send(html);
     } catch (error) {
         console.error('Error serving dashboard:', error);
@@ -244,7 +248,11 @@ app.get('/dashboard/', (req, res) => {
         // Insert the script before the closing </head> tag
         html = html.replace('</head>', `${envScript}\n</head>`);
 
+        // Add cache busting header to the HTML response itself
         res.set('Content-Type', 'text/html');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
         res.send(html);
     } catch (error) {
         console.error('Error serving dashboard:', error);
