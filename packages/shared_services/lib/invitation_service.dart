@@ -124,8 +124,8 @@ class InvitationService {
 
     try {
       // Verificar campos obligatorios
-      if (backendData['id'] == null || 
-          backendData['email'] == null || 
+      if (backendData['id'] == null ||
+          backendData['email'] == null ||
           backendData['role'] == null) {
         print('❌ Missing required fields in backend data');
         throw Exception('Missing required fields: id, email, or role');
@@ -163,20 +163,21 @@ class InvitationService {
           'system'; // valor por defecto si no existe
 
       final result = {
-        'invitationId':
-            backendData['id'], // Backend usa 'id', frontend espera 'invitationId'
+        'invitationId': backendData[
+            'id'], // Backend usa 'id', frontend espera 'invitationId'
         'email': backendData['email'],
         'role': backendData['role'],
         'token': token,
         'createdAt': createdAt.toIso8601String(), // Convertir a string ISO
-        'expiresAt': expiresAt.toIso8601String(), // Convertir a string ISO  
+        'expiresAt': expiresAt.toIso8601String(), // Convertir a string ISO
         'isUsed': backendData['status'] ==
             'accepted', // Backend usa 'status', frontend espera 'isUsed'
         'usedByUserId': null, // No disponible en backend actual
         'usedAt': null, // No disponible en backend actual
         'invitedByUserId': invitedByUserId,
-        'invitedByName':
-            backendData['inviterName'] ?? backendData['invitedByName'] ?? 'System',
+        'invitedByName': backendData['inviterName'] ??
+            backendData['invitedByName'] ??
+            'System',
       };
 
       print('🔄 Output data: $result');
@@ -253,6 +254,18 @@ class InvitationService {
         print('🔍 Decoded response data: $responseData');
         final List<dynamic> data = responseData['invitations'] ?? [];
         print('🔍 Extracted invitations array: $data');
+        print('🔍 Array length: ${data.length}');
+        
+        // Debug cada elemento del array individualmente
+        for (int i = 0; i < data.length; i++) {
+          print('🔍 Element $i type: ${data[i].runtimeType}');
+          print('🔍 Element $i value: ${data[i]}');
+          if (data[i] is Map) {
+            final item = data[i] as Map<String, dynamic>;
+            print('🔍 Element $i keys: ${item.keys.toList()}');
+          }
+        }
+        
         print(
             '✅ InvitationService: Successfully fetched ${data.length} invitations');
 
@@ -268,9 +281,16 @@ class InvitationService {
               continue;
             }
 
-            // Transform backend data to match frontend model
-            final rawInvitation = rawInvitationData as Map<String, dynamic>;
+            // Verificar que es un Map antes de convertir
+            if (rawInvitationData is! Map<String, dynamic>) {
+              print('⚠️ Invitation $i is not a Map, got: ${rawInvitationData.runtimeType}');
+              continue;
+            }
+
+            final rawInvitation = rawInvitationData;
             print('🔄 Transforming invitation data for invitation $i');
+            print('🔍 Raw invitation keys: ${rawInvitation.keys.toList()}');
+            
             final transformedData = _transformInvitationData(rawInvitation);
             print('✨ Transformed data: $transformedData');
 
@@ -281,6 +301,8 @@ class InvitationService {
             print('❌ Error parsing invitation $i: $e');
             print('❌ Raw data: ${data[i]}');
             print('❌ Stack trace: $stackTrace');
+            // Continue with next invitation instead of failing completely
+            continue;
           }
         }
 
