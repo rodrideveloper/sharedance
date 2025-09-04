@@ -12,9 +12,11 @@ SSH_KEY="~/.ssh/rodrigo_vps"
 if [ "$ENVIRONMENT" = "production" ]; then
     DOMAIN="sharedance.com.ar"
     VPS_PATH="/opt/sharedance"
+    API_PORT="3002"
 else
     DOMAIN="staging.sharedance.com.ar"
     VPS_PATH="/opt/sharedance"
+    API_PORT="3001"
 fi
 
 echo "🚀 Deploying ShareDance to $ENVIRONMENT environment"

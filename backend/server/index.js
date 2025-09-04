@@ -145,10 +145,10 @@ app.get('/', (req, res) => {
 // Health check
 app.get('/health', async (req, res) => {
     const startTime = Date.now();
-    
+
     // Check if request is from a browser (wants HTML)
     const wantsHtml = req.headers.accept && req.headers.accept.includes('text/html');
-    
+
     const healthData = {
         status: 'OK',
         timestamp: new Date().toISOString(),
@@ -176,10 +176,10 @@ app.get('/health', async (req, res) => {
         const EmailService = require('./services/emailService');
         const emailService = new EmailService();
         const emailStatus = await emailService.testConnection();
-        healthData.services.email = emailStatus ? 
-            { status: 'OK', message: 'Email service ready' } : 
+        healthData.services.email = emailStatus ?
+            { status: 'OK', message: 'Email service ready' } :
             { status: 'ERROR', message: 'Email service not ready' };
-        
+
         if (!emailStatus) {
             healthData.status = 'DEGRADED';
         }
@@ -375,7 +375,7 @@ app.get('/health', async (req, res) => {
     </div>
 </body>
 </html>`;
-        
+
         res.setHeader('Content-Type', 'text/html');
         res.status(healthData.status === 'OK' ? 200 : 503).send(htmlPage);
     } else {
