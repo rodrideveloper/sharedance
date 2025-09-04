@@ -11,10 +11,10 @@ SSH_KEY="~/.ssh/rodrigo_vps"
 
 if [ "$ENVIRONMENT" = "production" ]; then
     DOMAIN="sharedance.com.ar"
-    VPS_PATH="/var/www/sharedance"
+    VPS_PATH="/opt/sharedance"
 else
     DOMAIN="staging.sharedance.com.ar"
-    VPS_PATH="/var/www/staging-sharedance"
+    VPS_PATH="/opt/sharedance"
 fi
 
 echo "🚀 Deploying ShareDance to $ENVIRONMENT environment"
@@ -50,19 +50,19 @@ echo "🚀 Step 3: Deploying to VPS..."
 echo "📤 Uploading backend..."
 scp -i $SSH_KEY sharedance-backend-$ENVIRONMENT.tar.gz $VPS_USER@$VPS_HOST:/tmp/
 
-# Upload dashboard
+# Upload dashboard (commented out for now as we're focusing on backend API)
 echo "📤 Uploading dashboard..."
-rsync -avz --delete -e "ssh -i $SSH_KEY" apps/dashboard/build/web/ $VPS_USER@$VPS_HOST:$VPS_PATH/dashboard/
+# rsync -avz --delete -e "ssh -i $SSH_KEY" apps/dashboard/build/web/ $VPS_USER@$VPS_HOST:$VPS_PATH/dashboard/
 
 # Deploy backend on VPS
 echo "🔧 Deploying backend on VPS..."
 ssh -i $SSH_KEY $VPS_USER@$VPS_HOST << EOF
     # Create directories
-    sudo mkdir -p $VPS_PATH/api
+    sudo mkdir -p $VPS_PATH/server
     sudo chown -R $VPS_USER:$VPS_USER $VPS_PATH
     
     # Extract backend
-    cd $VPS_PATH/api
+    cd $VPS_PATH/server
     tar -xzf /tmp/sharedance-backend-$ENVIRONMENT.tar.gz
     
     # Install dependencies
@@ -73,7 +73,7 @@ ssh -i $SSH_KEY $VPS_USER@$VPS_HOST << EOF
     
     # Restart services
     pm2 stop sharedance-$ENVIRONMENT || true
-    pm2 start ecosystem.config.json --only sharedance-$ENVIRONMENT
+    pm2 start ecosystem.config.json --only sharedance-$ENVIRONMENT --env $ENVIRONMENT
     pm2 save
     
     # Clean up
