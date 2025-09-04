@@ -122,36 +122,70 @@ class InvitationService {
       Map<String, dynamic> backendData) {
     print('🔄 Input data: $backendData');
 
-    // Generar un token único si no existe
-    final token = backendData['token'] ??
-        'inv_${backendData['id']}_${DateTime.now().millisecondsSinceEpoch}';
+    try {
+      // Verificar campos obligatorios
+      if (backendData['id'] == null || 
+          backendData['email'] == null || 
+          backendData['role'] == null) {
+        print('❌ Missing required fields in backend data');
+        throw Exception('Missing required fields: id, email, or role');
+      }
 
-    // Asegurar que las fechas están en formato correcto
-    final createdAt = backendData['sentAt'] ?? backendData['createdAt'];
-    final expiresAt = backendData['expiresAt'];
+      // Generar un token único si no existe
+      final token = backendData['token'] ??
+          'inv_${backendData['id']}_${DateTime.now().millisecondsSinceEpoch}';
 
-    print('🔄 Dates - createdAt: $createdAt, expiresAt: $expiresAt');
+      // Manejar fechas - crear DateTime si no existen
+      DateTime createdAt;
+      DateTime expiresAt;
 
-    final result = {
-      'invitationId':
-          backendData['id'], // Backend usa 'id', frontend espera 'invitationId'
-      'email': backendData['email'],
-      'role': backendData['role'],
-      'token': token,
-      'createdAt': createdAt, // Ya viene como string ISO del backend
-      'expiresAt': expiresAt, // Ya viene como string ISO del backend
-      'isUsed': backendData['status'] ==
-          'accepted', // Backend usa 'status', frontend espera 'isUsed'
-      'usedByUserId': null, // No disponible en backend actual
-      'usedAt': null, // No disponible en backend actual
-      'invitedByUserId': backendData['inviterId'] ??
-          backendData['invitedByUserId'], // Backend usa 'inviterId'
-      'invitedByName':
-          backendData['inviterName'] ?? backendData['invitedByName'],
-    };
+      if (backendData['sentAt'] != null) {
+        createdAt = DateTime.parse(backendData['sentAt']);
+      } else if (backendData['createdAt'] != null) {
+        createdAt = DateTime.parse(backendData['createdAt']);
+      } else {
+        // Si no hay fecha, usar la actual
+        createdAt = DateTime.now();
+      }
 
-    print('🔄 Output data: $result');
-    return result;
+      if (backendData['expiresAt'] != null) {
+        expiresAt = DateTime.parse(backendData['expiresAt']);
+      } else {
+        // Si no hay fecha de expiración, usar 30 días desde creación
+        expiresAt = createdAt.add(const Duration(days: 30));
+      }
+
+      print('🔄 Dates - createdAt: $createdAt, expiresAt: $expiresAt');
+
+      // Asegurar que invitedByUserId no sea null
+      final invitedByUserId = backendData['inviterId'] ??
+          backendData['invitedByUserId'] ??
+          'system'; // valor por defecto si no existe
+
+      final result = {
+        'invitationId':
+            backendData['id'], // Backend usa 'id', frontend espera 'invitationId'
+        'email': backendData['email'],
+        'role': backendData['role'],
+        'token': token,
+        'createdAt': createdAt.toIso8601String(), // Convertir a string ISO
+        'expiresAt': expiresAt.toIso8601String(), // Convertir a string ISO  
+        'isUsed': backendData['status'] ==
+            'accepted', // Backend usa 'status', frontend espera 'isUsed'
+        'usedByUserId': null, // No disponible en backend actual
+        'usedAt': null, // No disponible en backend actual
+        'invitedByUserId': invitedByUserId,
+        'invitedByName':
+            backendData['inviterName'] ?? backendData['invitedByName'] ?? 'System',
+      };
+
+      print('🔄 Output data: $result');
+      return result;
+    } catch (e) {
+      print('❌ Error in _transformInvitationData: $e');
+      print('❌ Backend data: $backendData');
+      rethrow;
+    }
   }
 
   // Crear instructor automáticamente
