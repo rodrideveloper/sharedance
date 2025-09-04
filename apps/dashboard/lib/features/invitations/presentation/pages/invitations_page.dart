@@ -1,16 +1,4 @@
-import 'package:fl  @override
-  void initState() {
-    super.initState();
-    print('🎯 InvitationsPage: initState called');
-    print('🔗 InvitationsPage: Current URL base: ${Uri.base}');
-    print('🌐 InvitationsPage: AppConfig baseUrl: ${AppConfig.baseUrl}');
-    
-    // Add a small delay to ensure JavaScript is loaded
-    Future.delayed(Duration(milliseconds: 500), () {
-      print('⏰ InvitationsPage: Loading invitations after delay');
-      _loadInvitations();
-    });
-  }ial.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:shared_constants/shared_constants.dart';
@@ -31,13 +19,7 @@ class _InvitationsPageState extends State<InvitationsPage> {
   @override
   void initState() {
     super.initState();
-    print('🔄 InvitationsPage: initState - about to load invitations');
-    try {
-      context.read<InvitationsBloc>().add(const LoadInvitations());
-      print('✅ InvitationsPage: Successfully added LoadInvitations event');
-    } catch (e) {
-      print('❌ InvitationsPage: Error accessing InvitationsBloc: $e');
-    }
+    context.read<InvitationsBloc>().add(const LoadInvitations());
   }
 
   @override
