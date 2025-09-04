@@ -18,14 +18,13 @@ class EmailService {
 
     initializeTransporter() {
         this.transporter = nodemailer.createTransport({
-            service: process.env.EMAIL_SERVICE || 'gmail',
-            host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.EMAIL_PORT) || 587,
-            secure: process.env.EMAIL_SECURE === 'true',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
+            host: 'localhost',
+            port: 25,
+            secure: false,
+            auth: false,
+            tls: {
+                rejectUnauthorized: false
+            }
         });
     }
 
@@ -36,7 +35,7 @@ class EmailService {
             const mailOptions = {
                 from: {
                     name: 'ShareDance',
-                    address: process.env.EMAIL_USER
+                    address: 'noreply@sharedance.com.ar'
                 },
                 to: to,
                 subject: `¡Bienvenido a ShareDance! - Acceso como ${role}`,
@@ -59,7 +58,7 @@ class EmailService {
             const mailOptions = {
                 from: {
                     name: 'ShareDance',
-                    address: process.env.EMAIL_USER
+                    address: 'noreply@sharedance.com.ar'
                 },
                 to: to,
                 subject: `Invitación para unirte a ShareDance como ${role}`,
@@ -473,7 +472,7 @@ class EmailService {
             const mailOptions = {
                 from: {
                     name: 'ShareDance',
-                    address: process.env.EMAIL_USER
+                    address: 'noreply@sharedance.com.ar'
                 },
                 to: to,
                 subject: 'Recuperar Contraseña - ShareDance',
