@@ -40,11 +40,18 @@ class InvitationService {
     // Usar getAuthToken si está disponible, sino usar authToken
     String? token = authToken;
     if (getAuthToken != null) {
+      print('🔑 InvitationService: Getting token with getAuthToken function');
       token = await getAuthToken!();
+      print('🔑 InvitationService: Token received: ${token?.substring(0, 20)}...${token?.substring(token.length - 10)}');
+    } else {
+      print('🔑 InvitationService: Using static authToken');
     }
 
     if (token != null) {
       headers['Authorization'] = 'Bearer $token';
+      print('🔑 InvitationService: Authorization header set');
+    } else {
+      print('⚠️ InvitationService: NO TOKEN AVAILABLE - this will cause 401 error');
     }
     return headers;
   }
@@ -70,9 +77,12 @@ class InvitationService {
       };
       print('📤 InvitationService: Request body: ${jsonEncode(requestBody)}');
 
+      final headers = await _headers;
+      print('📤 InvitationService: Headers: $headers');
+
       final response = await http.post(
         Uri.parse('$_currentBaseUrl/api/invitations/send'),
-        headers: await _headers,
+        headers: headers,
         body: jsonEncode(requestBody),
       );
 
