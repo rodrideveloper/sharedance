@@ -286,7 +286,7 @@ class InvitationService {
 
       if (response.statusCode == 200) {
         print('🔍 Full response body: ${response.body}');
-        
+
         Map<String, dynamic> responseData;
         try {
           responseData = json.decode(response.body);
@@ -296,7 +296,7 @@ class InvitationService {
           print('❌ Problematic JSON: ${response.body}');
           throw Exception('Failed to parse JSON response: $e');
         }
-        
+
         final List<dynamic> data = responseData['invitations'] ?? [];
         print('🔍 Extracted invitations array: $data');
         print('🔍 Array length: ${data.length}');

@@ -6,6 +6,16 @@ class EmailService {
         this.initializeTransporter();
     }
 
+    // Generar contraseña temporal segura
+    generateTemporaryPassword() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+        let password = 'SD'; // Prefijo ShareDance
+        for (let i = 0; i < 8; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    }
+
     initializeTransporter() {
         this.transporter = nodemailer.createTransport({
             service: process.env.EMAIL_SERVICE || 'gmail',
@@ -17,6 +27,29 @@ class EmailService {
                 pass: process.env.EMAIL_PASS,
             },
         });
+    }
+
+    async sendWelcomeEmail(to, role, temporaryPassword, inviterName) {
+        try {
+            const html = this.generateWelcomeHTML(role, temporaryPassword, inviterName, to);
+
+            const mailOptions = {
+                from: {
+                    name: 'ShareDance',
+                    address: process.env.EMAIL_USER
+                },
+                to: to,
+                subject: `¡Bienvenido a ShareDance! - Acceso como ${role}`,
+                html: html,
+            };
+
+            const result = await this.transporter.sendMail(mailOptions);
+            console.log('Email de bienvenida enviado:', result.messageId);
+            return { success: true, messageId: result.messageId };
+        } catch (error) {
+            console.error('Error enviando email de bienvenida:', error);
+            return { success: false, error: error.message };
+        }
     }
 
     async sendInvitationEmail(to, role, inviterName, customMessage = '', invitationId = null) {
@@ -44,9 +77,9 @@ class EmailService {
 
     generateInvitationHTML(role, inviterName, customMessage, invitationId) {
         const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-        
+
         // Crear URL con el ID de invitación si está disponible
-        const invitationUrl = invitationId 
+        const invitationUrl = invitationId
             ? `${baseUrl}/register?invitation=${invitationId}&role=${role}`
             : `${baseUrl}/register?invitation=true&role=${role}`;
 
@@ -185,6 +218,162 @@ class EmailService {
     </body>
     </html>
     `;
+    }
+
+    generateWelcomeHTML(role, temporaryPassword, inviterName, email) {
+        const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+        const roleIcon = this.getRoleIcon(role);
+
+        return `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>¡Bienvenido a ShareDance!</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f8fafc;
+            }
+            .container {
+                background: white;
+                border-radius: 12px;
+                padding: 40px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #f1f5f9;
+            }
+            .logo {
+                font-size: 32px;
+                font-weight: bold;
+                color: #6366F1;
+                margin-bottom: 10px;
+            }
+            .role-badge {
+                display: inline-block;
+                background: linear-gradient(135deg, #6366F1, #8B5CF6);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: bold;
+                margin: 10px 0;
+            }
+            .credentials-box {
+                background: #f8fafc;
+                border: 2px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+                text-align: center;
+            }
+            .credential-item {
+                margin: 10px 0;
+                font-family: 'Courier New', monospace;
+                font-size: 16px;
+            }
+            .password {
+                background: #fef3c7;
+                padding: 8px 12px;
+                border-radius: 4px;
+                font-weight: bold;
+                color: #92400e;
+            }
+            .cta-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #6366F1, #8B5CF6);
+                color: white;
+                padding: 15px 30px;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: bold;
+                transition: transform 0.2s;
+            }
+            .cta-button:hover {
+                transform: translateY(-2px);
+            }
+            .footer {
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #e5e7eb;
+                text-align: center;
+                color: #6B7280;
+                font-size: 14px;
+            }
+            .warning {
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+                border-radius: 6px;
+                padding: 15px;
+                margin: 20px 0;
+                color: #991b1b;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">💃 ShareDance 🕺</div>
+                <h1>¡Bienvenido al equipo!</h1>
+                <div class="role-badge">${roleIcon} ${role}</div>
+            </div>
+            
+            <div class="content">
+                <p>¡Hola!</p>
+                
+                <p><strong>${inviterName}</strong> te ha dado acceso a ShareDance como <strong>${role}</strong>. Ya tienes tu cuenta lista para usar.</p>
+                
+                <div class="credentials-box">
+                    <h3>🔐 Tus credenciales de acceso</h3>
+                    <div class="credential-item">
+                        <strong>Email:</strong> ${email}
+                    </div>
+                    <div class="credential-item">
+                        <strong>Contraseña temporal:</strong> 
+                        <span class="password">${temporaryPassword}</span>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${baseUrl}" class="cta-button">
+                        📱 Abrir ShareDance
+                    </a>
+                </div>
+                
+                <div class="warning">
+                    <strong>💡 Tip:</strong> Puedes cambiar tu contraseña desde tu perfil en la app cuando quieras. Es totalmente opcional, pero recomendado para mayor seguridad.
+                </div>
+                
+                <p>ShareDance es tu plataforma para:</p>
+                <ul>
+                    <li>🎵 Aprender nuevos estilos de baile</li>
+                    <li>📅 Reservar clases con los mejores instructores</li>
+                    <li>👥 Conectar con una comunidad apasionada por la danza</li>
+                    <li>📈 Seguir tu progreso y evolución</li>
+                </ul>
+            </div>
+            
+            <div class="footer">
+                <p><strong>ShareDance Team</strong></p>
+                <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+                <p style="margin-top: 15px; font-size: 12px;">
+                    Ya puedes empezar a usar ShareDance con las credenciales de arriba.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+        `;
     }
 
     getRoleIcon(role) {

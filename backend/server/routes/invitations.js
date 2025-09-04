@@ -32,7 +32,7 @@ const authMiddleware = async (req, res, next) => {
     }
 };
 
-// Enviar invitación
+// Enviar invitación (flujo simplificado con creación automática de usuario)
 router.post('/send', authMiddleware, async (req, res) => {
     try {
         const { error, value } = invitationSchema.validate(req.body);
@@ -59,7 +59,32 @@ router.post('/send', authMiddleware, async (req, res) => {
             }
         }
 
-        // Crear documento de invitación en Firestore
+        // Generar contraseña temporal
+        const temporaryPassword = emailService.generateTemporaryPassword();
+
+        // Crear usuario en Firebase Auth con contraseña temporal
+        let newUser;
+        try {
+            newUser = await admin.auth().createUser({
+                email: email.toLowerCase(),
+                password: temporaryPassword,
+                emailVerified: false
+            });
+
+            // Asignar rol como custom claim
+            await admin.auth().setCustomUserClaims(newUser.uid, {
+                role: role.toLowerCase()
+            });
+
+        } catch (createUserError) {
+            console.error('Error creando usuario:', createUserError);
+            return res.status(500).json({
+                error: 'Error creando el usuario',
+                details: createUserError.message
+            });
+        }
+
+        // Crear documento de invitación en Firestore (ahora como registro de la acción)
         const db = admin.firestore();
         const invitationData = {
             email: email.toLowerCase(),
@@ -67,40 +92,52 @@ router.post('/send', authMiddleware, async (req, res) => {
             customMessage: customMessage || '',
             inviterName: inviterName || req.user.name || 'ShareDance Team',
             inviterId: req.user.uid,
-            status: 'pending',
+            status: 'completed', // Ya está completada automáticamente
             sentAt: admin.firestore.FieldValue.serverTimestamp(),
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
+            userUid: newUser.uid, // Referencia al usuario creado
+            completedAt: admin.firestore.FieldValue.serverTimestamp(),
         };
 
         const invitationRef = await db.collection('invitations').add(invitationData);
 
-        // Enviar email
-        const emailResult = await emailService.sendInvitationEmail(
+        // Enviar email de bienvenida con credenciales
+        const emailResult = await emailService.sendWelcomeEmail(
             email,
             role,
-            inviterName || req.user.name || 'ShareDance Team',
-            customMessage,
-            invitationRef.id // Pasar el ID de la invitación
+            temporaryPassword,
+            inviterName || req.user.name || 'ShareDance Team'
         );
 
         if (!emailResult.success) {
-            // Si falla el email, eliminar la invitación
-            await invitationRef.delete();
+            // Si falla el email, no eliminamos el usuario ya creado, pero registramos el error
+            console.error('Error enviando email de bienvenida:', emailResult.error);
+            
+            // Actualizar invitación con el error del email
+            await invitationRef.update({
+                emailError: emailResult.error,
+                emailSent: false
+            });
+
             return res.status(500).json({
-                error: 'Error enviando la invitación por email',
-                details: emailResult.error
+                error: 'Usuario creado correctamente, pero hubo un error enviando el email de bienvenida',
+                details: emailResult.error,
+                userCreated: true,
+                userUid: newUser.uid
             });
         }
 
         // Actualizar con messageId del email
         await invitationRef.update({
-            emailMessageId: emailResult.messageId
+            emailMessageId: emailResult.messageId,
+            emailSent: true
         });
 
         res.status(201).json({
-            message: 'Invitación enviada correctamente',
+            message: 'Usuario creado y email de bienvenida enviado correctamente',
             invitationId: invitationRef.id,
-            messageId: emailResult.messageId
+            messageId: emailResult.messageId,
+            userUid: newUser.uid,
+            userCreated: true
         });
 
     } catch (error) {
@@ -124,7 +161,12 @@ router.get('/', authMiddleware, async (req, res) => {
             .offset(parseInt(offset));
 
         if (status && status !== 'all') {
-            query = query.where('status', '==', status);
+            if (status === 'pending') {
+                // Buscar por invitaciones que fallaron al enviar email
+                query = query.where('emailSent', '==', false);
+            } else if (status === 'completed') {
+                query = query.where('status', '==', 'completed');
+            }
         }
 
         const snapshot = await query.get();
@@ -135,21 +177,24 @@ router.get('/', authMiddleware, async (req, res) => {
 
             // Convertir Timestamps de Firebase a strings ISO
             let sentAt = null;
-            let expiresAt = null;
+            let completedAt = null;
 
             if (data.sentAt) {
                 sentAt = data.sentAt.toDate().toISOString();
             }
 
-            if (data.expiresAt) {
-                expiresAt = data.expiresAt.toDate().toISOString();
+            if (data.completedAt) {
+                completedAt = data.completedAt.toDate().toISOString();
             }
 
             invitations.push({
                 id: doc.id,
                 ...data,
                 sentAt: sentAt,
-                expiresAt: expiresAt
+                completedAt: completedAt,
+                // Agregar campos calculados para compatibilidad con frontend
+                expiresAt: null, // Ya no aplicable
+                status: data.emailSent === false ? 'email_failed' : data.status
             });
         });
 
@@ -176,7 +221,7 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 });
 
-// Reenviar invitación
+// Reenviar email de bienvenida (solo si el email falló inicialmente)
 router.post('/:id/resend', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
@@ -190,29 +235,48 @@ router.post('/:id/resend', authMiddleware, async (req, res) => {
 
         const invitation = invitationDoc.data();
 
-        if (invitation.status === 'accepted') {
-            return res.status(400).json({ error: 'La invitación ya fue aceptada' });
-        }
-
-        // Verificar si no ha expirado (opcional, podríamos permitir reenvío de expiradas)
-        if (invitation.expiresAt && invitation.expiresAt.toDate() < new Date()) {
-            // Extender la expiración
-            await invitationDoc.ref.update({
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        if (invitation.status === 'completed' && invitation.emailSent) {
+            return res.status(400).json({ 
+                error: 'El email de bienvenida ya fue enviado correctamente' 
             });
         }
 
-        // Reenviar email
-        const emailResult = await emailService.sendInvitationEmail(
+        if (!invitation.userUid) {
+            return res.status(400).json({ 
+                error: 'No se puede reenviar: usuario no fue creado correctamente' 
+            });
+        }
+
+        // Obtener información del usuario para reenviar credenciales
+        let user;
+        try {
+            user = await admin.auth().getUser(invitation.userUid);
+        } catch (userError) {
+            return res.status(404).json({ 
+                error: 'Usuario asociado no encontrado',
+                details: userError.message
+            });
+        }
+
+        // Generar nueva contraseña temporal
+        const temporaryPassword = emailService.generateTemporaryPassword();
+
+        // Actualizar contraseña del usuario
+        await admin.auth().updateUser(invitation.userUid, {
+            password: temporaryPassword
+        });
+
+        // Reenviar email con la nueva contraseña
+        const emailResult = await emailService.sendWelcomeEmail(
             invitation.email,
             invitation.role,
-            invitation.inviterName,
-            invitation.customMessage
+            temporaryPassword,
+            invitation.inviterName
         );
 
         if (!emailResult.success) {
             return res.status(500).json({
-                error: 'Error reenviando la invitación',
+                error: 'Error reenviando el email de bienvenida',
                 details: emailResult.error
             });
         }
@@ -221,11 +285,13 @@ router.post('/:id/resend', authMiddleware, async (req, res) => {
         await invitationDoc.ref.update({
             lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
             resendCount: admin.firestore.FieldValue.increment(1),
-            emailMessageId: emailResult.messageId
+            emailMessageId: emailResult.messageId,
+            emailSent: true,
+            emailError: admin.firestore.FieldValue.delete() // Limpiar error anterior
         });
 
         res.json({
-            message: 'Invitación reenviada correctamente',
+            message: 'Email de bienvenida reenviado correctamente con nueva contraseña',
             messageId: emailResult.messageId
         });
 
@@ -263,15 +329,10 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// Aceptar invitación (para el frontend)
+// Verificar estado de invitación (ya no se usa para aceptar, solo para consultas)
 router.post('/:id/accept', async (req, res) => {
     try {
         const { id } = req.params;
-        const { userUid } = req.body;
-
-        if (!userUid) {
-            return res.status(400).json({ error: 'UID de usuario requerido' });
-        }
 
         const db = admin.firestore();
         const invitationDoc = await db.collection('invitations').doc(id).get();
@@ -282,29 +343,19 @@ router.post('/:id/accept', async (req, res) => {
 
         const invitation = invitationDoc.data();
 
-        if (invitation.status === 'accepted') {
-            return res.status(400).json({ error: 'La invitación ya fue aceptada' });
+        if (invitation.status === 'completed') {
+            return res.json({
+                message: 'El usuario ya fue creado automáticamente',
+                status: 'completed',
+                userUid: invitation.userUid,
+                role: invitation.role
+            });
         }
 
-        if (invitation.expiresAt && invitation.expiresAt.toDate() < new Date()) {
-            return res.status(400).json({ error: 'La invitación ha expirado' });
-        }
-
-        // Actualizar invitación como aceptada
-        await invitationDoc.ref.update({
-            status: 'accepted',
-            acceptedAt: admin.firestore.FieldValue.serverTimestamp(),
-            acceptedByUid: userUid
-        });
-
-        // Actualizar rol del usuario en Firebase Auth
-        await admin.auth().setCustomUserClaims(userUid, {
-            role: invitation.role.toLowerCase()
-        });
-
-        res.json({
-            message: 'Invitación aceptada correctamente',
-            role: invitation.role
+        // Esto no debería pasar con el nuevo flujo, pero por compatibilidad
+        return res.status(400).json({ 
+            error: 'Invitación en estado inválido',
+            status: invitation.status 
         });
 
     } catch (error) {
@@ -322,19 +373,18 @@ router.get('/stats', authMiddleware, async (req, res) => {
         const db = admin.firestore();
         const invitationsRef = db.collection('invitations');
 
-        const [totalSnapshot, pendingSnapshot, acceptedSnapshot, expiredSnapshot] = await Promise.all([
+        const [totalSnapshot, completedSnapshot, emailFailedSnapshot] = await Promise.all([
             invitationsRef.get(),
-            invitationsRef.where('status', '==', 'pending').get(),
-            invitationsRef.where('status', '==', 'accepted').get(),
-            invitationsRef.where('expiresAt', '<', new Date()).get()
+            invitationsRef.where('status', '==', 'completed').get(),
+            invitationsRef.where('emailSent', '==', false).get()
         ]);
 
         const stats = {
             total: totalSnapshot.size,
-            pending: pendingSnapshot.size,
-            accepted: acceptedSnapshot.size,
-            expired: expiredSnapshot.size,
-            rejected: totalSnapshot.size - pendingSnapshot.size - acceptedSnapshot.size
+            completed: completedSnapshot.size,
+            emailFailed: emailFailedSnapshot.size,
+            successRate: totalSnapshot.size > 0 ? 
+                Math.round((completedSnapshot.size / totalSnapshot.size) * 100) : 0
         };
 
         res.json(stats);
