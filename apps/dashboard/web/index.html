@@ -39,10 +39,10 @@
     // Environment detection for ShareDance
     window.sharedanceConfig = {
       hostname: window.location.hostname,
-      isStaging: window.location.hostname === 'staging.sharedance.com.ar' || 
-                 window.location.hostname === 'localhost' || 
-                 window.location.hostname === '127.0.0.1',
-      baseUrl: function() {
+      isStaging: window.location.hostname === 'staging.sharedance.com.ar' ||
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1',
+      baseUrl: function () {
         if (this.isStaging) {
           return 'https://staging.sharedance.com.ar';
         } else {
@@ -50,7 +50,7 @@
         }
       }
     };
-    
+
     console.log('🌐 ShareDance Config:', window.sharedanceConfig);
     console.log('🌐 Hostname detected:', window.location.hostname);
     console.log('🌐 Is staging:', window.sharedanceConfig.isStaging);

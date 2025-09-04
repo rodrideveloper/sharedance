@@ -22,13 +22,13 @@ class InvitationService {
       print('🔗 InvitationService: Using dynamic baseUrl: $dynamicUrl');
       return dynamicUrl;
     }
-    
+
     // Fallback to static baseUrl
     if (baseUrl != null) {
       print('🔗 InvitationService: Using static baseUrl: $baseUrl');
       return baseUrl!;
     }
-    
+
     throw Exception('No baseUrl provided to InvitationService');
   }
 
@@ -57,8 +57,9 @@ class InvitationService {
   }) async {
     try {
       print('📤 InvitationService: Sending invitation to: $email');
-      print('🔗 InvitationService: Using URL: $_currentBaseUrl/api/invitations/send');
-      
+      print(
+          '🔗 InvitationService: Using URL: $_currentBaseUrl/api/invitations/send');
+
       final response = await http.post(
         Uri.parse('$_currentBaseUrl/api/invitations/send'),
         headers: await _headers,
@@ -142,19 +143,21 @@ class InvitationService {
     try {
       final url = '$_currentBaseUrl/api/invitations';
       print('🔗 InvitationService: Fetching invitations from: $url');
-      
+
       final response = await http.get(
         Uri.parse(url),
         headers: await _headers,
       );
 
       print('📊 InvitationService: Response status: ${response.statusCode}');
-      print('📊 InvitationService: Response body preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
+      print(
+          '📊 InvitationService: Response body preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        print('✅ InvitationService: Successfully fetched ${data.length} invitations');
-        
+        print(
+            '✅ InvitationService: Successfully fetched ${data.length} invitations');
+
         final List<InvitationModel> invitations = [];
         for (int i = 0; i < data.length; i++) {
           try {
@@ -165,10 +168,11 @@ class InvitationService {
             print('❌ Raw data: ${data[i]}');
           }
         }
-        
+
         return invitations;
       } else {
-        print('❌ InvitationService: Failed to fetch invitations - Status: ${response.statusCode}');
+        print(
+            '❌ InvitationService: Failed to fetch invitations - Status: ${response.statusCode}');
         print('❌ InvitationService: Response body: ${response.body}');
         throw Exception('Failed to load invitations: ${response.statusCode}');
       }

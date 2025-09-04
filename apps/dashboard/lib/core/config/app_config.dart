@@ -26,23 +26,25 @@ class AppConfig {
     final hostname = Uri.base.host;
     print('🌐 AppConfig Debug - Current hostname: $hostname');
     print('🌐 AppConfig Debug - Current Uri.base: ${Uri.base}');
-    
+
     // Check if we're running on localhost for development
     if (hostname == 'localhost' || hostname == '127.0.0.1') {
       // For localhost development, use staging backend
       print('🏠 AppConfig: Detected localhost - using staging backend');
       return 'https://staging.sharedance.com.ar';
     }
-    
+
     // Check if we're running on staging domain
     if (hostname == 'staging.sharedance.com.ar') {
       print('🔧 AppConfig: Detected staging domain - using staging backend');
       return 'https://staging.sharedance.com.ar';
     }
-    
+
     // Check if we're running on production domain
     if (hostname == 'sharedance.com.ar') {
-      print('🏭 AppConfig: Detected production domain - using production backend');
+      print(
+        '🏭 AppConfig: Detected production domain - using production backend',
+      );
       return 'https://sharedance.com.ar';
     }
 
@@ -54,7 +56,9 @@ class AppConfig {
         return 'https://staging.sharedance.com.ar';
       case 'production':
       default:
-        print('🏭 AppConfig: Flavor production (default) - using production backend');
+        print(
+          '🏭 AppConfig: Flavor production (default) - using production backend',
+        );
         return 'https://sharedance.com.ar';
     }
   }
@@ -75,8 +79,10 @@ class AppConfig {
     // Fallback to Uri.base.host detection
     final hostname = Uri.base.host;
     print('🌐 AppConfig Debug - Current hostname: $hostname');
-    
-    if (hostname == 'localhost' || hostname == '127.0.0.1' || hostname == 'staging.sharedance.com.ar') {
+
+    if (hostname == 'localhost' ||
+        hostname == '127.0.0.1' ||
+        hostname == 'staging.sharedance.com.ar') {
       print('🔧 AppConfig: Fallback hostname detection - isStaging: true');
       return true;
     }
