@@ -142,7 +142,8 @@ class InvitationService {
       try {
         if (backendData['sentAt'] != null) {
           final sentAtValue = backendData['sentAt'];
-          print('🔄 sentAt raw value: $sentAtValue (${sentAtValue.runtimeType})');
+          print(
+              '🔄 sentAt raw value: $sentAtValue (${sentAtValue.runtimeType})');
           if (sentAtValue is String) {
             createdAt = DateTime.parse(sentAtValue);
           } else {
@@ -151,7 +152,8 @@ class InvitationService {
           }
         } else if (backendData['createdAt'] != null) {
           final createdAtValue = backendData['createdAt'];
-          print('🔄 createdAt raw value: $createdAtValue (${createdAtValue.runtimeType})');
+          print(
+              '🔄 createdAt raw value: $createdAtValue (${createdAtValue.runtimeType})');
           if (createdAtValue is String) {
             createdAt = DateTime.parse(createdAtValue);
           } else {
@@ -171,7 +173,8 @@ class InvitationService {
       try {
         if (backendData['expiresAt'] != null) {
           final expiresAtValue = backendData['expiresAt'];
-          print('🔄 expiresAt raw value: $expiresAtValue (${expiresAtValue.runtimeType})');
+          print(
+              '🔄 expiresAt raw value: $expiresAtValue (${expiresAtValue.runtimeType})');
           if (expiresAtValue is String) {
             expiresAt = DateTime.parse(expiresAtValue);
           } else {
@@ -283,8 +286,17 @@ class InvitationService {
 
       if (response.statusCode == 200) {
         print('🔍 Full response body: ${response.body}');
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        print('🔍 Decoded response data: $responseData');
+        
+        Map<String, dynamic> responseData;
+        try {
+          responseData = json.decode(response.body);
+          print('🔍 Decoded response data: $responseData');
+        } catch (e) {
+          print('❌ JSON decode error: $e');
+          print('❌ Problematic JSON: ${response.body}');
+          throw Exception('Failed to parse JSON response: $e');
+        }
+        
         final List<dynamic> data = responseData['invitations'] ?? [];
         print('🔍 Extracted invitations array: $data');
         print('🔍 Array length: ${data.length}');

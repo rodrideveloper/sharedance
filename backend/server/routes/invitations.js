@@ -130,11 +130,25 @@ router.get('/', authMiddleware, async (req, res) => {
 
         const invitations = [];
         snapshot.forEach(doc => {
+            const data = doc.data();
+            
+            // Convertir Timestamps de Firebase a strings ISO
+            let sentAt = null;
+            let expiresAt = null;
+            
+            if (data.sentAt) {
+                sentAt = data.sentAt.toDate().toISOString();
+            }
+            
+            if (data.expiresAt) {
+                expiresAt = data.expiresAt.toDate().toISOString();
+            }
+            
             invitations.push({
                 id: doc.id,
-                ...doc.data(),
-                sentAt: doc.data().sentAt?.toDate(),
-                expiresAt: doc.data().expiresAt?.toDate()
+                ...data,
+                sentAt: sentAt,
+                expiresAt: expiresAt
             });
         });
 
