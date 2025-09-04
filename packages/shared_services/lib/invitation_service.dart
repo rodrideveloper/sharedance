@@ -43,6 +43,7 @@ class InvitationService {
       print('🔑 InvitationService: Getting token with getAuthToken function');
       token = await getAuthToken!();
       print('🔑 InvitationService: Token received: ${token?.substring(0, 20)}...${token?.substring(token.length - 10)}');
+      print('🔑 InvitationService: Full token for testing: $token');
     } else {
       print('🔑 InvitationService: Using static authToken');
     }
@@ -75,10 +76,12 @@ class InvitationService {
         'role': roleString,
         'customMessage': customMessage ?? '',
       };
-      print('📤 InvitationService: Request body: ${jsonEncode(requestBody)}');
-
+      
+      // Debug con alert para ver exactamente qué se envía
+      print('🚨 DEBUG REQUEST BODY: ${jsonEncode(requestBody)}');
+      
       final headers = await _headers;
-      print('📤 InvitationService: Headers: $headers');
+      print('� DEBUG HEADERS: $headers');
 
       final response = await http.post(
         Uri.parse('$_currentBaseUrl/api/invitations/send'),
