@@ -3,15 +3,34 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class InvitationService {
-  final String baseUrl;
+  final String? baseUrl;
   final String? authToken;
   final Future<String?> Function()? getAuthToken;
+  final String Function()? getBaseUrl;
 
   InvitationService({
-    required this.baseUrl,
+    this.baseUrl,
     this.authToken,
     this.getAuthToken,
+    this.getBaseUrl,
   });
+
+  String get _currentBaseUrl {
+    // If getBaseUrl function is provided, use it to get dynamic baseUrl
+    if (getBaseUrl != null) {
+      final dynamicUrl = getBaseUrl!();
+      print('🔗 InvitationService: Using dynamic baseUrl: $dynamicUrl');
+      return dynamicUrl;
+    }
+    
+    // Fallback to static baseUrl
+    if (baseUrl != null) {
+      print('🔗 InvitationService: Using static baseUrl: $baseUrl');
+      return baseUrl!;
+    }
+    
+    throw Exception('No baseUrl provided to InvitationService');
+  }
 
   Future<Map<String, String>> get _headers async {
     final headers = {
@@ -37,8 +56,11 @@ class InvitationService {
     String? customMessage,
   }) async {
     try {
+      print('📤 InvitationService: Sending invitation to: $email');
+      print('🔗 InvitationService: Using URL: $_currentBaseUrl/api/invitations/send');
+      
       final response = await http.post(
-        Uri.parse('$baseUrl/api/invitations'),
+        Uri.parse('$_currentBaseUrl/api/invitations/send'),
         headers: await _headers,
         body: jsonEncode({
           'email': email,
@@ -80,7 +102,7 @@ class InvitationService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/api/invitations/create-instructor'),
+        Uri.parse('$_currentBaseUrl/api/invitations/create-instructor'),
         headers: await _headers,
         body: jsonEncode({
           'email': email,
@@ -115,44 +137,45 @@ class InvitationService {
     }
   }
 
-  // Obtener lista de invitaciones
-  Future<List<InvitationModel>> getInvitations({
-    String? status,
-    int limit = 50,
-    int offset = 0,
-  }) async {
+  /// Obtiene todas las invitaciones
+  Future<List<InvitationModel>> getInvitations() async {
     try {
-      final queryParams = <String, String>{
-        'limit': limit.toString(),
-        'offset': offset.toString(),
-      };
-      if (status != null) {
-        queryParams['status'] = status;
-      }
-
-      final uri = Uri.parse('$baseUrl/api/invitations').replace(
-        queryParameters: queryParams,
+      final url = '$_currentBaseUrl/api/invitations';
+      print('🔗 InvitationService: Fetching invitations from: $url');
+      
+      final response = await http.get(
+        Uri.parse(url),
+        headers: await _headers,
       );
 
-      final response = await http.get(uri, headers: await _headers);
+      print('📊 InvitationService: Response status: ${response.statusCode}');
+      print('📊 InvitationService: Response body preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final invitationsJson = data['invitations'] as List<dynamic>;
-
-        return invitationsJson
-            .map((json) =>
-                InvitationModel.fromJson(json as Map<String, dynamic>))
-            .toList();
+        final List<dynamic> data = json.decode(response.body);
+        print('✅ InvitationService: Successfully fetched ${data.length} invitations');
+        
+        final List<InvitationModel> invitations = [];
+        for (int i = 0; i < data.length; i++) {
+          try {
+            final invitation = InvitationModel.fromJson(data[i]);
+            invitations.add(invitation);
+          } catch (e) {
+            print('❌ Error parsing invitation $i: $e');
+            print('❌ Raw data: ${data[i]}');
+          }
+        }
+        
+        return invitations;
       } else {
-        // Si hay error, retornar lista vacía en lugar de crash
-        print('Error getting invitations: ${response.statusCode}');
-        return [];
+        print('❌ InvitationService: Failed to fetch invitations - Status: ${response.statusCode}');
+        print('❌ InvitationService: Response body: ${response.body}');
+        throw Exception('Failed to load invitations: ${response.statusCode}');
       }
-    } catch (e) {
-      print('Error getting invitations: $e');
-      // En caso de error, retornar lista vacía
-      return [];
+    } catch (e, stackTrace) {
+      print('❌ InvitationService: Exception in getInvitations: $e');
+      print('❌ Stack trace: $stackTrace');
+      throw Exception('Error fetching invitations: $e');
     }
   }
 
@@ -160,7 +183,7 @@ class InvitationService {
   Future<bool> cancelInvitation(String invitationId) async {
     try {
       final response = await http.delete(
-        Uri.parse('$baseUrl/api/invitations/$invitationId'),
+        Uri.parse('$_currentBaseUrl/api/invitations/$invitationId'),
         headers: await _headers,
       );
 
@@ -175,7 +198,7 @@ class InvitationService {
   Future<bool> resendInvitation(String invitationId) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/api/invitations/$invitationId/resend'),
+        Uri.parse('$_currentBaseUrl/api/invitations/$invitationId/resend'),
         headers: await _headers,
       );
 
