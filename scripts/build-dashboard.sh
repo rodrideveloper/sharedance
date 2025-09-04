@@ -19,14 +19,12 @@ flutter pub get
 echo "🔨 Building Flutter web app..."
 if [ "$ENVIRONMENT" = "production" ]; then
     flutter build web --release \
-        --web-renderer html \
         --base-href="/dashboard/" \
         --dart-define=ENVIRONMENT=production \
         --dart-define=API_BASE_URL=https://sharedance.com.ar/api \
         --dart-define=FRONTEND_URL=https://sharedance.com.ar
 else
     flutter build web --release \
-        --web-renderer html \
         --base-href="/dashboard/" \
         --dart-define=ENVIRONMENT=staging \
         --dart-define=API_BASE_URL=https://staging.sharedance.com.ar/api \

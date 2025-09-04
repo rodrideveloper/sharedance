@@ -5,8 +5,9 @@ set -e
 
 # Configuration
 ENVIRONMENT=${1:-staging}
-VPS_USER="usuario"
-VPS_HOST="your-vps-ip"  # Replace with your VPS IP
+VPS_USER="ubuntu"
+VPS_HOST="148.113.197.152"
+SSH_KEY="~/.ssh/rodrigo_vps"
 
 if [ "$ENVIRONMENT" = "production" ]; then
     DOMAIN="sharedance.com.ar"
@@ -47,15 +48,15 @@ echo "🚀 Step 3: Deploying to VPS..."
 
 # Upload backend
 echo "📤 Uploading backend..."
-scp sharedance-backend-$ENVIRONMENT.tar.gz $VPS_USER@$VPS_HOST:/tmp/
+scp -i $SSH_KEY sharedance-backend-$ENVIRONMENT.tar.gz $VPS_USER@$VPS_HOST:/tmp/
 
 # Upload dashboard
 echo "📤 Uploading dashboard..."
-rsync -avz --delete apps/dashboard/build/web/ $VPS_USER@$VPS_HOST:$VPS_PATH/dashboard/
+rsync -avz --delete -e "ssh -i $SSH_KEY" apps/dashboard/build/web/ $VPS_USER@$VPS_HOST:$VPS_PATH/dashboard/
 
 # Deploy backend on VPS
 echo "🔧 Deploying backend on VPS..."
-ssh $VPS_USER@$VPS_HOST << EOF
+ssh -i $SSH_KEY $VPS_USER@$VPS_HOST << EOF
     # Create directories
     sudo mkdir -p $VPS_PATH/api
     sudo chown -R $VPS_USER:$VPS_USER $VPS_PATH
@@ -83,7 +84,7 @@ EOF
 
 # 4. Update Nginx configuration
 echo "🔧 Step 4: Updating Nginx..."
-ssh $VPS_USER@$VPS_HOST << 'EOF'
+ssh -i $SSH_KEY $VPS_USER@$VPS_HOST << 'EOF'
     # Update Nginx config for dashboard routing
     sudo tee /etc/nginx/sites-available/sharedance << 'NGINX_CONFIG'
 server {
@@ -159,4 +160,4 @@ echo "🔗 API: https://$DOMAIN/api"
 echo "🏠 Landing: https://$DOMAIN"
 echo ""
 echo "🔍 To check status:"
-echo "   ssh $VPS_USER@$VPS_HOST 'pm2 status'"
+echo "   ssh -i $SSH_KEY $VPS_USER@$VPS_HOST 'pm2 status'"
