@@ -139,19 +139,52 @@ class InvitationService {
       DateTime createdAt;
       DateTime expiresAt;
 
-      if (backendData['sentAt'] != null) {
-        createdAt = DateTime.parse(backendData['sentAt']);
-      } else if (backendData['createdAt'] != null) {
-        createdAt = DateTime.parse(backendData['createdAt']);
-      } else {
-        // Si no hay fecha, usar la actual
+      try {
+        if (backendData['sentAt'] != null) {
+          final sentAtValue = backendData['sentAt'];
+          print('🔄 sentAt raw value: $sentAtValue (${sentAtValue.runtimeType})');
+          if (sentAtValue is String) {
+            createdAt = DateTime.parse(sentAtValue);
+          } else {
+            print('⚠️ sentAt is not a String, using current time');
+            createdAt = DateTime.now();
+          }
+        } else if (backendData['createdAt'] != null) {
+          final createdAtValue = backendData['createdAt'];
+          print('🔄 createdAt raw value: $createdAtValue (${createdAtValue.runtimeType})');
+          if (createdAtValue is String) {
+            createdAt = DateTime.parse(createdAtValue);
+          } else {
+            print('⚠️ createdAt is not a String, using current time');
+            createdAt = DateTime.now();
+          }
+        } else {
+          // Si no hay fecha, usar la actual
+          print('⚠️ No sentAt or createdAt found, using current time');
+          createdAt = DateTime.now();
+        }
+      } catch (e) {
+        print('❌ Error parsing createdAt/sentAt: $e, using current time');
         createdAt = DateTime.now();
       }
 
-      if (backendData['expiresAt'] != null) {
-        expiresAt = DateTime.parse(backendData['expiresAt']);
-      } else {
-        // Si no hay fecha de expiración, usar 30 días desde creación
+      try {
+        if (backendData['expiresAt'] != null) {
+          final expiresAtValue = backendData['expiresAt'];
+          print('🔄 expiresAt raw value: $expiresAtValue (${expiresAtValue.runtimeType})');
+          if (expiresAtValue is String) {
+            expiresAt = DateTime.parse(expiresAtValue);
+          } else {
+            print('⚠️ expiresAt is not a String, using default expiration');
+            expiresAt = createdAt.add(const Duration(days: 30));
+          }
+        } else {
+          // Si no hay fecha de expiración, usar 30 días desde creación
+          print('⚠️ No expiresAt found, using 30 days from creation');
+          expiresAt = createdAt.add(const Duration(days: 30));
+        }
+      } catch (e) {
+        print('❌ Error parsing expiresAt: $e, using 30 days from creation');
         expiresAt = createdAt.add(const Duration(days: 30));
       }
 
@@ -255,7 +288,7 @@ class InvitationService {
         final List<dynamic> data = responseData['invitations'] ?? [];
         print('🔍 Extracted invitations array: $data');
         print('🔍 Array length: ${data.length}');
-        
+
         // Debug cada elemento del array individualmente
         for (int i = 0; i < data.length; i++) {
           print('🔍 Element $i type: ${data[i].runtimeType}');
@@ -265,7 +298,7 @@ class InvitationService {
             print('🔍 Element $i keys: ${item.keys.toList()}');
           }
         }
-        
+
         print(
             '✅ InvitationService: Successfully fetched ${data.length} invitations');
 
@@ -283,14 +316,15 @@ class InvitationService {
 
             // Verificar que es un Map antes de convertir
             if (rawInvitationData is! Map<String, dynamic>) {
-              print('⚠️ Invitation $i is not a Map, got: ${rawInvitationData.runtimeType}');
+              print(
+                  '⚠️ Invitation $i is not a Map, got: ${rawInvitationData.runtimeType}');
               continue;
             }
 
             final rawInvitation = rawInvitationData;
             print('🔄 Transforming invitation data for invitation $i');
             print('🔍 Raw invitation keys: ${rawInvitation.keys.toList()}');
-            
+
             final transformedData = _transformInvitationData(rawInvitation);
             print('✨ Transformed data: $transformedData');
 
