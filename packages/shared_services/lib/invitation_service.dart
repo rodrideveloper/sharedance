@@ -66,7 +66,7 @@ class InvitationService {
       final requestBody = {
         'email': email,
         'role': roleString,
-        'customMessage': customMessage,
+        'customMessage': customMessage ?? '',
       };
       print('📤 InvitationService: Request body: ${jsonEncode(requestBody)}');
 

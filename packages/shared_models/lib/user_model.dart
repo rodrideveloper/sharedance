@@ -4,11 +4,11 @@ import 'package:json_annotation/json_annotation.dart';
 part 'user_model.g.dart';
 
 enum UserRole {
-  @JsonValue('student')
+  @JsonValue('Student')
   student,
-  @JsonValue('teacher')
+  @JsonValue('Teacher')
   teacher,
-  @JsonValue('admin')
+  @JsonValue('Admin')
   admin,
 }
 
