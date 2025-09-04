@@ -36,7 +36,9 @@ class AppConfig {
 
     // Check if we're running on staging admin domain
     if (hostname == 'staging-admin.sharedance.com.ar') {
-      print('🔧 AppConfig: Detected staging admin domain - using staging backend');
+      print(
+        '🔧 AppConfig: Detected staging admin domain - using staging backend',
+      );
       return 'https://staging.sharedance.com.ar';
     }
 

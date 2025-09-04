@@ -56,19 +56,28 @@ class InvitationService {
     String? customMessage,
   }) async {
     try {
+      final roleString = _roleToString(role);
       print('📤 InvitationService: Sending invitation to: $email');
+      print('📤 InvitationService: Role enum: $role');
+      print('📤 InvitationService: Role string: $roleString');
       print(
           '🔗 InvitationService: Using URL: $_currentBaseUrl/api/invitations/send');
+
+      final requestBody = {
+        'email': email,
+        'role': roleString,
+        'customMessage': customMessage,
+      };
+      print('📤 InvitationService: Request body: ${jsonEncode(requestBody)}');
 
       final response = await http.post(
         Uri.parse('$_currentBaseUrl/api/invitations/send'),
         headers: await _headers,
-        body: jsonEncode({
-          'email': email,
-          'role': _roleToString(role),
-          'customMessage': customMessage,
-        }),
+        body: jsonEncode(requestBody),
       );
+
+      print('📤 InvitationService: Response status: ${response.statusCode}');
+      print('📤 InvitationService: Response body: ${response.body}');
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
 

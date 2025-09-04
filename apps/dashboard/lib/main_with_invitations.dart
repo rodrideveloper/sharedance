@@ -37,7 +37,8 @@ class ShareDanceWithInvitationsApp extends StatelessWidget {
                       (context) => InvitationsBloc(
                         invitationService: InvitationService(
                           getBaseUrl: () => AppConfig.baseUrl,
-                          getAuthToken: () async => await AuthService.getIdToken(),
+                          getAuthToken:
+                              () async => await AuthService.getIdToken(),
                         ),
                       ),
                 ),
