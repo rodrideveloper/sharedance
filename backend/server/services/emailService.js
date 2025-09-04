@@ -19,9 +19,9 @@ class EmailService {
         });
     }
 
-    async sendInvitationEmail(to, role, inviterName, customMessage = '') {
+    async sendInvitationEmail(to, role, inviterName, customMessage = '', invitationId = null) {
         try {
-            const html = this.generateInvitationHTML(role, inviterName, customMessage);
+            const html = this.generateInvitationHTML(role, inviterName, customMessage, invitationId);
 
             const mailOptions = {
                 from: {
@@ -42,8 +42,13 @@ class EmailService {
         }
     }
 
-    generateInvitationHTML(role, inviterName, customMessage) {
+    generateInvitationHTML(role, inviterName, customMessage, invitationId) {
         const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+        
+        // Crear URL con el ID de invitación si está disponible
+        const invitationUrl = invitationId 
+            ? `${baseUrl}/register?invitation=${invitationId}&role=${role}`
+            : `${baseUrl}/register?invitation=true&role=${role}`;
 
         return `
     <!DOCTYPE html>
@@ -156,15 +161,15 @@ class EmailService {
                 ` : ''}
                 
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="${baseUrl}/register?invitation=true&role=${role}" class="cta-button">
+                                        <a href="${invitationUrl}" class="cta-button">
                         Aceptar Invitación
                     </a>
                 </div>
                 
-                <p style="color: #6b7280; font-size: 14px;">
-                    Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:<br>
-                    <a href="${baseUrl}/register?invitation=true&role=${role}" style="color: #6366F1;">
-                        ${baseUrl}/register?invitation=true&role=${role}
+                <p style="color: #6B7280; font-size: 14px; margin-top: 30px;">
+                    Si el botón no funciona, puedes copiar y pegar este enlace en tu navegador:
+                    <a href="${invitationUrl}" style="color: #6366F1;">
+                        ${invitationUrl}
                     </a>
                 </p>
             </div>

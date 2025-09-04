@@ -11,7 +11,8 @@
                 "NODE_ENV": "staging",
                 "PORT": 3001,
                 "FIREBASE_PROJECT_ID": "sharedance-staging",
-                "FIREBASE_SERVICE_ACCOUNT_PATH": "./serviceAccount-staging.json"
+                "FIREBASE_SERVICE_ACCOUNT_PATH": "./serviceAccount-staging.json",
+                "FRONTEND_URL": "https://staging.sharedance.com.ar"
             },
             "log_file": "./logs/staging-combined.log",
             "out_file": "./logs/staging-out.log",
@@ -35,7 +36,8 @@
                 "NODE_ENV": "production",
                 "PORT": 3002,
                 "FIREBASE_PROJECT_ID": "sharedance-production",
-                "FIREBASE_SERVICE_ACCOUNT_PATH": "./serviceAccount-production.json"
+                "FIREBASE_SERVICE_ACCOUNT_PATH": "./serviceAccount-production.json",
+                "FRONTEND_URL": "https://sharedance.com.ar"
             },
             "log_file": "./logs/production-combined.log",
             "out_file": "./logs/production-out.log",
