@@ -6,15 +6,28 @@ set -e
 # Configuration
 ENVIRONMENT=${1:-staging}
 VPS_USER="ubuntu"
-VPS_HOST="148.113.197.152"
+V    # API routes
+    location /api {
+        proxy_pass http://localhost:$API_PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+    }.113.197.152"
 SSH_KEY="~/.ssh/rodrigo_vps"
 
 if [ "$ENVIRONMENT" = "production" ]; then
     DOMAIN="sharedance.com.ar"
     VPS_PATH="/opt/sharedance"
+    API_PORT="3002"
 else
     DOMAIN="staging.sharedance.com.ar"
     VPS_PATH="/opt/sharedance"
+    API_PORT="3001"
 fi
 
 echo "🚀 Deploying ShareDance to $ENVIRONMENT environment"
