@@ -111,7 +111,7 @@ router.post('/send', authMiddleware, async (req, res) => {
         if (!emailResult.success) {
             // Si falla el email, no eliminamos el usuario ya creado, pero registramos el error
             console.error('Error enviando email de bienvenida:', emailResult.error);
-            
+
             // Actualizar invitación con el error del email
             await invitationRef.update({
                 emailError: emailResult.error,
@@ -236,14 +236,14 @@ router.post('/:id/resend', authMiddleware, async (req, res) => {
         const invitation = invitationDoc.data();
 
         if (invitation.status === 'completed' && invitation.emailSent) {
-            return res.status(400).json({ 
-                error: 'El email de bienvenida ya fue enviado correctamente' 
+            return res.status(400).json({
+                error: 'El email de bienvenida ya fue enviado correctamente'
             });
         }
 
         if (!invitation.userUid) {
-            return res.status(400).json({ 
-                error: 'No se puede reenviar: usuario no fue creado correctamente' 
+            return res.status(400).json({
+                error: 'No se puede reenviar: usuario no fue creado correctamente'
             });
         }
 
@@ -252,7 +252,7 @@ router.post('/:id/resend', authMiddleware, async (req, res) => {
         try {
             user = await admin.auth().getUser(invitation.userUid);
         } catch (userError) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 error: 'Usuario asociado no encontrado',
                 details: userError.message
             });
@@ -353,9 +353,9 @@ router.post('/:id/accept', async (req, res) => {
         }
 
         // Esto no debería pasar con el nuevo flujo, pero por compatibilidad
-        return res.status(400).json({ 
+        return res.status(400).json({
             error: 'Invitación en estado inválido',
-            status: invitation.status 
+            status: invitation.status
         });
 
     } catch (error) {
@@ -383,7 +383,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
             total: totalSnapshot.size,
             completed: completedSnapshot.size,
             emailFailed: emailFailedSnapshot.size,
-            successRate: totalSnapshot.size > 0 ? 
+            successRate: totalSnapshot.size > 0 ?
                 Math.round((completedSnapshot.size / totalSnapshot.size) * 100) : 0
         };
 
