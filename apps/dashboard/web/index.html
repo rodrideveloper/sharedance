@@ -39,7 +39,8 @@
     // Environment detection for ShareDance
     window.sharedanceConfig = {
       hostname: window.location.hostname,
-      isStaging: window.location.hostname === 'staging.sharedance.com.ar' ||
+      isStaging: window.location.hostname === 'staging-admin.sharedance.com.ar' ||
+        window.location.hostname === 'staging.sharedance.com.ar' ||
         window.location.hostname === 'localhost' ||
         window.location.hostname === '127.0.0.1',
       baseUrl: function () {

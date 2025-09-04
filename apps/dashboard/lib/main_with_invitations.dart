@@ -30,16 +30,14 @@ class ShareDanceWithInvitationsApp extends StatelessWidget {
         return FutureBuilder<String?>(
           future: AuthService.getIdToken(),
           builder: (context, tokenSnapshot) {
-            final authToken = tokenSnapshot.data;
-
             return MultiBlocProvider(
               providers: [
                 BlocProvider(
                   create:
                       (context) => InvitationsBloc(
                         invitationService: InvitationService(
-                          baseUrl: AppConfig.baseUrl,
-                          authToken: authToken,
+                          getBaseUrl: () => AppConfig.baseUrl,
+                          getAuthToken: () async => await AuthService.getIdToken(),
                         ),
                       ),
                 ),

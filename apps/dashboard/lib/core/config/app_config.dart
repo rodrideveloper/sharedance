@@ -34,13 +34,26 @@ class AppConfig {
       return 'https://staging.sharedance.com.ar';
     }
 
-    // Check if we're running on staging domain
+    // Check if we're running on staging admin domain
+    if (hostname == 'staging-admin.sharedance.com.ar') {
+      print('🔧 AppConfig: Detected staging admin domain - using staging backend');
+      return 'https://staging.sharedance.com.ar';
+    }
+
+    // Check if we're running on production admin domain
+    if (hostname == 'admin.sharedance.com.ar') {
+      print(
+        '🏭 AppConfig: Detected production admin domain - using production backend',
+      );
+      return 'https://sharedance.com.ar';
+    }
+
+    // Legacy support for dashboard subdirectories
     if (hostname == 'staging.sharedance.com.ar') {
       print('🔧 AppConfig: Detected staging domain - using staging backend');
       return 'https://staging.sharedance.com.ar';
     }
 
-    // Check if we're running on production domain
     if (hostname == 'sharedance.com.ar') {
       print(
         '🏭 AppConfig: Detected production domain - using production backend',
