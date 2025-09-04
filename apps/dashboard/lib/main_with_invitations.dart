@@ -6,6 +6,7 @@ import 'package:shared_constants/shared_constants.dart';
 import 'package:shared_services/shared_services.dart';
 import 'features/invitations/presentation/bloc/invitations_bloc.dart';
 import 'features/invitations/presentation/pages/invitations_page.dart';
+import 'features/auth/login_page.dart';
 import 'core/config/app_config.dart';
 import 'core/auth/auth_service.dart';
 import 'firebase_options.dart';
@@ -27,9 +28,49 @@ class ShareDanceWithInvitationsApp extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: AuthService.authStateChanges,
       builder: (context, snapshot) {
+        print('🔐 Auth StreamBuilder - Connection state: ${snapshot.connectionState}');
+        print('🔐 Auth StreamBuilder - Has data: ${snapshot.hasData}');
+        print('🔐 Auth StreamBuilder - User: ${snapshot.data?.email}');
+        
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MaterialApp(
+            home: Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data == null) {
+          print('🔐 User not authenticated, showing login');
+          return MaterialApp(
+            home: LoginPage(),
+          );
+        }
+
+        print('🔐 User authenticated: ${snapshot.data!.email}');
+        
         return FutureBuilder<String?>(
           future: AuthService.getIdToken(),
           builder: (context, tokenSnapshot) {
+            print('🔑 Token FutureBuilder - Connection state: ${tokenSnapshot.connectionState}');
+            print('🔑 Token FutureBuilder - Has data: ${tokenSnapshot.hasData}');
+            print('🔑 Token preview: ${tokenSnapshot.data?.substring(0, 20)}...');
+            
+            if (tokenSnapshot.connectionState == ConnectionState.waiting) {
+              return const MaterialApp(
+                home: Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                ),
+              );
+            }
+
+            if (!tokenSnapshot.hasData || tokenSnapshot.data == null) {
+              print('⚠️ No token available, user needs to re-authenticate');
+              return MaterialApp(
+                home: LoginPage(),
+              );
+            }
+
             return MultiBlocProvider(
               providers: [
                 BlocProvider(
