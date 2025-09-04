@@ -95,72 +95,30 @@ ssh -i $SSH_KEY $VPS_USER@$VPS_HOST << EOF
     echo "✅ Backend deployed successfully!"
 EOF
 
-# 4. Update Nginx configuration
-echo "🔧 Step 4: Updating Nginx..."
-ssh -i $SSH_KEY $VPS_USER@$VPS_HOST << 'EOF'
-    # Update Nginx config for dashboard routing
-    sudo tee /etc/nginx/sites-available/sharedance << 'NGINX_CONFIG'
-server {
-    listen 80;
-    server_name sharedance.com.ar www.sharedance.com.ar;
+# 4. Update Nginx configuration (only if needed)
+echo "🔧 Step 4: Checking Nginx configuration..."
+ssh -i $SSH_KEY $VPS_USER@$VPS_HOST << EOF
+    # Check if nginx config exists and has the correct structure
+    if [ "$ENVIRONMENT" = "production" ]; then
+        CONFIG_FILE="/etc/nginx/sites-available/sharedance"
+    else
+        CONFIG_FILE="/etc/nginx/sites-available/sharedance-staging"
+    fi
     
-    # Redirect HTTP to HTTPS
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name sharedance.com.ar www.sharedance.com.ar;
+    # Only update if config doesn't exist or doesn't have health endpoint
+    if [ ! -f "\\\$CONFIG_FILE" ] || ! grep -q "location /health" "\\\$CONFIG_FILE"; then
+        echo "⚠️  Nginx config needs update, but manual configuration detected."
+        echo "📋 Please ensure your nginx config includes:"
+        echo "   - Landing page served from /opt/sharedance/landing"
+        echo "   - /health endpoint proxied to backend"
+        echo "   - /api endpoints proxied to localhost:$API_PORT"
+        echo "   - /dashboard served from /opt/sharedance/dashboard/$ENVIRONMENT"
+    else
+        echo "✅ Nginx configuration already correct!"
+    fi
     
-    # SSL configuration (configure your SSL certificates)
-    ssl_certificate /etc/ssl/certs/sharedance.crt;
-    ssl_certificate_key /etc/ssl/private/sharedance.key;
-    
-    # Root directory for static files
-    root /var/www/sharedance;
-    index index.html;
-    
-    # Dashboard route
-    location /dashboard {
-        alias /var/www/sharedance/dashboard;
-        try_files $uri $uri/ /dashboard/index.html;
-        
-        # Headers for Flutter web
-        add_header Cache-Control "no-cache, no-store, must-revalidate";
-        add_header Pragma "no-cache";
-        add_header Expires "0";
-    }
-    
-    # API routes
-    location /api {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-    
-    # Landing page (root)
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-    
-    # Static assets
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-}
-NGINX_CONFIG
-
-    # Test and reload Nginx
-    sudo nginx -t && sudo systemctl reload nginx
-    
-    echo "✅ Nginx configuration updated!"
+    # Test nginx config
+    sudo nginx -t
 EOF
 
 # Clean up
@@ -171,6 +129,7 @@ echo "🎉 Deployment completed successfully!"
 echo "🌐 Dashboard: https://$DOMAIN/dashboard"
 echo "🔗 API: https://$DOMAIN/api"
 echo "🏠 Landing: https://$DOMAIN"
+echo "🔍 Health: https://$DOMAIN/health"
 echo ""
 echo "🔍 To check status:"
 echo "   ssh -i $SSH_KEY $VPS_USER@$VPS_HOST 'pm2 status'"
