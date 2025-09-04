@@ -42,8 +42,8 @@ class InvitationService {
     if (getAuthToken != null) {
       print('🔑 InvitationService: Getting token with getAuthToken function');
       token = await getAuthToken!();
-      print('🔑 InvitationService: Token received: ${token?.substring(0, 20)}...${token?.substring(token.length - 10)}');
-      print('🔑 InvitationService: Full token for testing: $token');
+      print(
+          '🔑 InvitationService: Token received: ${token?.substring(0, 20)}...${token?.substring(token.length - 10)}');
     } else {
       print('🔑 InvitationService: Using static authToken');
     }
@@ -52,7 +52,8 @@ class InvitationService {
       headers['Authorization'] = 'Bearer $token';
       print('🔑 InvitationService: Authorization header set');
     } else {
-      print('⚠️ InvitationService: NO TOKEN AVAILABLE - this will cause 401 error');
+      print(
+          '⚠️ InvitationService: NO TOKEN AVAILABLE - this will cause 401 error');
     }
     return headers;
   }
@@ -76,10 +77,10 @@ class InvitationService {
         'role': roleString,
         'customMessage': customMessage ?? '',
       };
-      
+
       // Debug con alert para ver exactamente qué se envía
       print('🚨 DEBUG REQUEST BODY: ${jsonEncode(requestBody)}');
-      
+
       final headers = await _headers;
       print('� DEBUG HEADERS: $headers');
 
@@ -114,6 +115,43 @@ class InvitationService {
         error: e.toString(),
       );
     }
+  }
+
+  /// Transforma los datos del backend al formato esperado por el modelo del frontend
+  Map<String, dynamic> _transformInvitationData(
+      Map<String, dynamic> backendData) {
+    print('🔄 Input data: $backendData');
+
+    // Generar un token único si no existe
+    final token = backendData['token'] ??
+        'inv_${backendData['id']}_${DateTime.now().millisecondsSinceEpoch}';
+
+    // Asegurar que las fechas están en formato correcto
+    final createdAt = backendData['sentAt'] ?? backendData['createdAt'];
+    final expiresAt = backendData['expiresAt'];
+
+    print('🔄 Dates - createdAt: $createdAt, expiresAt: $expiresAt');
+
+    final result = {
+      'invitationId':
+          backendData['id'], // Backend usa 'id', frontend espera 'invitationId'
+      'email': backendData['email'],
+      'role': backendData['role'],
+      'token': token,
+      'createdAt': createdAt, // Ya viene como string ISO del backend
+      'expiresAt': expiresAt, // Ya viene como string ISO del backend
+      'isUsed': backendData['status'] ==
+          'accepted', // Backend usa 'status', frontend espera 'isUsed'
+      'usedByUserId': null, // No disponible en backend actual
+      'usedAt': null, // No disponible en backend actual
+      'invitedByUserId': backendData['inviterId'] ??
+          backendData['invitedByUserId'], // Backend usa 'inviterId'
+      'invitedByName':
+          backendData['inviterName'] ?? backendData['invitedByName'],
+    };
+
+    print('🔄 Output data: $result');
+    return result;
   }
 
   // Crear instructor automáticamente
@@ -176,18 +214,39 @@ class InvitationService {
           '📊 InvitationService: Response body preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        print('🔍 Full response body: ${response.body}');
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        print('🔍 Decoded response data: $responseData');
+        final List<dynamic> data = responseData['invitations'] ?? [];
+        print('🔍 Extracted invitations array: $data');
         print(
             '✅ InvitationService: Successfully fetched ${data.length} invitations');
 
         final List<InvitationModel> invitations = [];
         for (int i = 0; i < data.length; i++) {
           try {
-            final invitation = InvitationModel.fromJson(data[i]);
+            final rawInvitationData = data[i];
+            print(
+                '🔍 Processing invitation $i: Type: ${rawInvitationData.runtimeType}, Value: $rawInvitationData');
+
+            if (rawInvitationData == null) {
+              print('⚠️ Invitation $i is null, skipping...');
+              continue;
+            }
+
+            // Transform backend data to match frontend model
+            final rawInvitation = rawInvitationData as Map<String, dynamic>;
+            print('🔄 Transforming invitation data for invitation $i');
+            final transformedData = _transformInvitationData(rawInvitation);
+            print('✨ Transformed data: $transformedData');
+
+            final invitation = InvitationModel.fromJson(transformedData);
             invitations.add(invitation);
-          } catch (e) {
+            print('✅ Successfully parsed invitation $i');
+          } catch (e, stackTrace) {
             print('❌ Error parsing invitation $i: $e');
             print('❌ Raw data: ${data[i]}');
+            print('❌ Stack trace: $stackTrace');
           }
         }
 
