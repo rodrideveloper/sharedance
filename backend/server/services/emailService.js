@@ -43,7 +43,6 @@ class EmailService {
             };
 
             const result = await this.transporter.sendMail(mailOptions);
-            console.log('Email de bienvenida enviado:', result.messageId);
             return { success: true, messageId: result.messageId };
         } catch (error) {
             console.error('Error enviando email de bienvenida:', error);
@@ -66,7 +65,6 @@ class EmailService {
             };
 
             const result = await this.transporter.sendMail(mailOptions);
-            console.log('Email enviado:', result.messageId);
             return { success: true, messageId: result.messageId };
         } catch (error) {
             console.error('Error enviando email:', error);
@@ -490,7 +488,6 @@ class EmailService {
     async testConnection() {
         try {
             await this.transporter.verify();
-            console.log('Conexión de email configurada correctamente');
             return true;
         } catch (error) {
             console.error('Error en la configuración de email:', error);
